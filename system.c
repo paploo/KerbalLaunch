@@ -8,7 +8,7 @@ System *system_alloc(void) {
 
 void system_dealloc(System *self) {
     statistics_dealloc(self->stats);
-    return free(self);
+    free(self);
 }
 
 System *system_init(System *self) {

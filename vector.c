@@ -7,6 +7,10 @@ double vector_mag(Vector v) {
     return sqrt(vector_inner(v,v));
 }
 
+double vector_azm(Vector v) {
+    return atan2(v.v[1], v.v[0]);
+}
+
 double vector_inner(Vector v, Vector u) {
     double sum = 0.0;
     for(size_t i=0; i<VECTOR_DIMS; i++)

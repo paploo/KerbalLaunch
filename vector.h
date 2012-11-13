@@ -8,7 +8,10 @@ typedef struct Vector {
 } Vector;
 
 double vector_mag(Vector v);
+double vector_azm(Vector v);
+
 double vector_inner(Vector v, Vector u);
+
 Vector vector_add(Vector v, Vector u);
 Vector vector_sub(Vector v, Vector u);
 
