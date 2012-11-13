@@ -4,12 +4,13 @@
 #include "rocket.h"
 #include "vector.h"
 
+#define DEGREE 57.29577951308232
+
 int main(){
-    Rocket *r = rocket_init( rocket_alloc() );
-    r->position.v[0] = 1.1;
-    rocket_dealloc(r);
-    printf("%f\n", r->position.v[0]);
-    printf("%f\n", r->velocity.v[0]);
+    //r = 10.0, theta = 210 deg =-150 deg = 3.665191429188092 rad
+    Vector v = {{-8.660254037844387, -5.00}};
+    printf("(%f, %f)\n", v.v[0], v.v[1]);
+    printf("%f @ %f\n", vector_mag(v), vector_azm(v)*DEGREE);
 
     return 0;
 }

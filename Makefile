@@ -15,8 +15,8 @@ OBJECTS = $(SOURCES:.c=.o)
 # Explicit rules
 .PHONY : clean all build run clean-plists
 
-# Build (and run if we want)
-all: build run
+# Build
+all: build
 
 # Build the bin and clean plists.
 build: $(BIN) clean-plists
@@ -36,7 +36,7 @@ $(OBJECTS) : %.o: %.c
 
 # Run!
 run:
-	./$(BIN)
+	time ./$(BIN)
 
 # Clean!
 clean:
