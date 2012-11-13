@@ -1,9 +1,15 @@
 # Setup compile environment.
 CC = clang
-CFLAGS = -Wall -pedantic -std=c99 -O3
+CFLAGS = -Wall -pedantic -std=c99
+
+RELEASE_CFLAGS = -O3
+DEBUG_CFLAGS = -DDEBUG -O0 -g
+
+DEBUGGER = lldb
 
 # Set the name of the products
-BIN = kerbal_launch
+EXECUTABLE = kerbal_launch
+EXECUTABLE_DEBUG = $(EXECUTABLE).debug
 
 # Get the names of the files.
 HEADERS = $(wildcard *.h)
@@ -13,17 +19,25 @@ SOURCES = $(wildcard *.c)
 OBJECTS = $(SOURCES:.c=.o)
 
 # Explicit rules
-.PHONY : clean all build run clean-plists
+.PHONY : clean all release debug run rune-debug
 
 # Build
-all: build
+all: release
 
-# Build the bin and clean plists.
-build: $(BIN) clean-plists
+# Build the exec for release
+release: CFLAGS += $(RELEASE_CFLAGS)
+release: $(EXECUTABLE)
+
+# Build the exec for debug
+debug: CFLAGS += $(DEBUG_CFLAGS)
+debug: $(EXECUTABLE_DEBUG)
 
 # The bin is built using the objects.
-$(BIN): $(OBJECTS)
-	$(CC) -v -o $(BIN) $(OBJECTS)
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) -v -o $(EXECUTABLE) $(OBJECTS)
+
+$(EXECUTABLE_DEBUG): $(OBJECTS)
+	$(CC) -v -o $(EXECUTABLE_DEBUG) $(OBJECTS)
 
 # Make all targets have all headers as dependencies.
 # For a project of any size it is better to explicitly list.
@@ -36,11 +50,15 @@ $(OBJECTS) : %.o: %.c
 
 # Run!
 run:
-	time ./$(BIN)
+	time ./$(EXECUTABLE)
+
+# Run with debugger.
+run-debug: debug
+	$(DEBUGGER) $(EXECUTABLE_DEBUG)
 
 # Clean!
-clean:
-	rm -rf *.o *.plist $(BIN)
+clean: clean-plists
+	rm -rf $(OBJECTS) $(EXECUTABLE) $(EXECUTABLE_DEBUG)
 
 # Remove only the plists.
 clean-plists:

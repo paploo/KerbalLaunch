@@ -1,4 +1,5 @@
 kerbal_launch
+kerbal_launch.debug
 *.o
 *.plist
 
