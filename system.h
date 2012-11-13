@@ -13,7 +13,7 @@ typedef struct System {
     double delta_t;
 
     double time;
-    Statistics *stats;
+    Statistics stats;
 } System;
 
 System *system_alloc(void);

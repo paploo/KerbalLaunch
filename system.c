@@ -7,7 +7,6 @@ System *system_alloc(void) {
 }
 
 void system_dealloc(System *self) {
-    statistics_dealloc(self->stats);
     free(self);
 }
 
@@ -19,7 +18,7 @@ System *system_init(System *self) {
     self->delta_t = 1.0/100.0;
 
     self->time = 0.0;
-    self->stats = statistics_init(statistics_alloc());
+    statistics_init(&self->stats);
 
     return self;
 }
