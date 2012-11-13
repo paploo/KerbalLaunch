@@ -1,0 +1,6 @@
+kerbal_launch
+*.o
+*.plist
+
+*.swp
+*.swo
