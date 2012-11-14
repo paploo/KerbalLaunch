@@ -3,6 +3,25 @@
 
 #include "vector.h"
 
+Vector vector() {
+    Vector v = {{0,0}};
+    return v;
+}
+
+Vector vector_rect(double x, double y) {
+    Vector v;
+    v.v[0] = x;
+    v.v[1] = y;
+    return v;
+}
+
+Vector vector_polar(double mag, double azm) {
+    Vector v;
+    v.v[0] = mag * cos(azm);
+    v.v[1] = mag * sin(azm);
+    return v;
+}
+
 double vector_mag(Vector v) {
     return sqrt(vector_inner(v,v));
 }

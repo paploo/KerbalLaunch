@@ -7,6 +7,10 @@ typedef struct Vector {
     double v[2];
 } Vector;
 
+inline Vector vector();
+inline Vector vector_rect(double x, double y);
+Vector vector_polar(double mag, double azm);
+
 double vector_mag(Vector v);
 double vector_azm(Vector v);
 

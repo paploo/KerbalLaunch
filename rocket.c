@@ -37,3 +37,13 @@ double rocket_mass_flow(const Rocket *self, double atm) {
 double rocket_thrust(const Rocket *self, double atm) {
     return (self->throttle * self->max_thrust);
 }
+
+Vector rocket_thrust_force(const Rocket *self, double atm) {
+    Vector f_vec = vector();
+    return f_vec;
+}
+
+double rocket_frontal_area(const Rocket *self) {
+    //TODO: Change so that we smoothly change from the frontal area to the side_area depending on velocity vector angle.
+    return self->frontal_area;
+}

@@ -24,6 +24,10 @@ Planetoid *planetoid_init(Planetoid *self) {
     return self;
 }
 
+double planetoid_atm(Planetoid *self, double radius) {
+    return exp(-radius / self->atmospheric_attenuation);
+}
+
 Vector planetoid_gravitational_force(Planetoid *self, Vector position) {
     // Compute the relative position vector, r
     Vector r_vec = vector_sub(position, self->position);
@@ -32,19 +36,20 @@ Vector planetoid_gravitational_force(Planetoid *self, Vector position) {
     double f_mag = -(self->gravitational_parameter)/vector_mag(r_vec);
 
     // Compute the gravitational force angle
-    double f_ang = M_PI/2.0; //TODO: Compute using the angle of r_vec.
+    double f_azm = M_PI/2.0; //TODO: Compute using the angle of r_vec.
 
-    Vector force;
-    force.v[0] = f_mag * cos(f_ang);
-    force.v[1] = f_mag * sin(f_ang);
-    return force;
+    // Return the vector.
+    return vector_polar(f_mag, f_azm);
 }
 
-Vector planetoid_atmospheric_drag(Planetoid *self, Vector position, Vector speed, double frontal_area, double coeff) {
-    //TODO: Implement the atmospheric drag method.
-    //Vector r_vec = vector_sub(psotion, self->position);
-    //double r = -(self->
-    //double f_mag = 0.5 * planetoid_atm(r)
-    Vector r;
-    return r;
+Vector planetoid_atmospheric_drag(Planetoid *self, Vector position, Vector velocity, double frontal_area, double coeff) {
+    Vector r_vec = vector_sub(position, self->position);
+    double r = vector_mag(r_vec);
+
+    double v = vector_mag(velocity);
+
+    double f_mag = 0.5 * planetoid_atm(self, r) * coeff * frontal_area * v * v;
+    double f_azm = vector_azm(velocity);
+
+    return vector_polar(f_mag, f_azm);
 }

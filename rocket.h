@@ -15,6 +15,8 @@ typedef struct Rocket {
     double max_thrust;
     double isp_vac;
     double isp_atm;
+
+    double frontal_area;
 } Rocket;
 
 
@@ -24,6 +26,8 @@ Rocket *rocket_init(Rocket *self);
 
 double rocket_isp(const Rocket *self, double atm);
 double rocket_thrust(const Rocket *self, double atm);
+Vector rocket_thrust_force(const Rocket *self, double atm);
 double rocket_mass_flow(const Rocket *self, double atm);
+double rocket_frontal_area(const Rocket *self);
 
 #endif
