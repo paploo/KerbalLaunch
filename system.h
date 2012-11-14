@@ -1,6 +1,8 @@
 #ifndef KERBAL_LAUNCH_SYSTEM_H
 #define KERBAL_LAUNCH_SYSTEM_H
 
+#include <stdbool.h>
+
 #include "rocket.h"
 #include "program.h"
 #include "planetoid.h"
@@ -25,7 +27,7 @@ typedef struct System {
     unsigned long ticks;
     SystemState state;
 
-    int logging;
+    bool logging;
 
     Statistics stats;
 } System;
@@ -44,6 +46,6 @@ void system_set_throttle(System *self);
 void system_set_bearing(System *self);
 void system_update_stats(System *self, Vector delta_position, Vector delta_velocity);
 void system_log_header(const System *self);
-void system_log_tick(const System *self, Vector delta_position, Vector delta_velocity);
+void system_log_tick(const System *self, double delta_mass, Vector force, Vector acceleration, Vector delta_position, Vector delta_velocity);
 
 #endif

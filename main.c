@@ -1,13 +1,69 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
-#include "rocket.h"
-#include "vector.h"
-#include "program.h"
+#include "system.h"
 
 #define DEGREE 57.29577951308232
 
+void test();
+int simulate();
+
 int main(){
+    return simulate();
+}
+
+int simulate() {
+    //Build the planetoid
+    Planetoid *kerbin = planetoid_init(planetoid_alloc());
+
+    //Build the rocket
+    Rocket *rocket = rocket_init(rocket_alloc());
+    rocket->position.v[1] = kerbin->radius + 10.0;
+
+    //Build the programs
+    Program *throttle_program = program_init(program_alloc(), 1);
+    throttle_program->altitudes[0] = -600000.0;
+    throttle_program->settings[0] = 1.0;
+
+    Program *bearing_program = program_init(program_alloc(), 1);
+    bearing_program->altitudes[0] = -600000.0;
+    bearing_program->settings[0] = M_PI/2.0;
+
+
+    //Build the system
+    System *system = system_init(system_alloc());
+    system->planetoid = kerbin;
+    system->rocket = rocket;
+    system->throttle_program = throttle_program;
+    system->bearing_program = bearing_program;
+    system->logging = 1;
+
+    //Run
+    system_run(system);
+
+    //Output stats
+    printf("state     : %d\n", system->state);
+    printf("ticks     : %lu\n", system->ticks);
+
+    Statistics *stats = &system->stats;
+    printf("time      : %f s\n", stats->mission_time);
+    printf("max_radius: %f m @ %f sec\n", stats->max_radius, stats->max_radius_time);
+    printf("distance  : %f m\n", stats->distance_travelled);
+    printf("delta_v   : %f m/s\n", stats->delta_v);
+
+    //Cleanup
+    system_dealloc(system);
+    program_dealloc(throttle_program);
+    program_dealloc(bearing_program);
+    rocket_dealloc(rocket);
+    planetoid_dealloc(kerbin);
+
+    return 0;
+}
+
+
+void test() {
     //r = 10.0, theta = 210 deg =-150 deg = 3.665191429188092 rad
     Vector v = vector_rect(-8.660254037844387, -5.00);
     printf("(%f, %f)\n", v.v[0], v.v[1]);
@@ -39,5 +95,6 @@ int main(){
     double throttle = program_lookup(p, alt, &err);
     printf("%f -> %f, %d\n", alt, throttle, err);
 
-    return 0;
+    program_dealloc(p);
+    program_dealloc(q);
 }

@@ -23,7 +23,7 @@ System *system_init(System *self) {
     self->state = SYSTEM_STATE_READY;
     self->ticks = 0;
 
-    self->logging = 0;
+    self->logging = false;
 
     statistics_init(&self->stats);
 
@@ -35,12 +35,14 @@ void system_run(System *self) {
     system_log_header(self);
 
     //Run
-    while( self->rocket->position.v[0] > 0.0 ) {
+    double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
+    while( altitude >= 0.0 ) {
         if( system_time(self) > MAX_MISSION_TIME ) {
             self->state = SYSTEM_STATE_ERROR;
             break;
         }
         system_run_one_tick(self);
+        altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
     }
     self->state = SYSTEM_STATE_SUCCESS;
 
@@ -76,7 +78,7 @@ void system_run_one_tick(System *self) {
 
     //Then record the statistics.
     system_update_stats(self, delta_r, delta_v);
-    system_log_tick(self, delta_r, delta_v);
+    system_log_tick(self, dm, f, a, delta_r, delta_v);
 
     //Increment time.
     self->ticks++;
@@ -123,29 +125,33 @@ void system_log_header(const System *self) {
     if(!self->logging)
         return;
 
-    printf("time, m, x, y, vx, vy, r, alt, azm, delta_v, throttle, angle\n");
+    printf("tick, time, m, dm, x, y, vx, vy, r, alt, azm, delta_v, fx, fy, throttle, bearing\n");
 }
 
-void system_log_tick(const System *self, Vector delta_position, Vector delta_velocity) {
+void system_log_tick(const System *self, double delta_mass, Vector force, Vector acceleration, Vector delta_position, Vector delta_velocity) {
     if(!self->logging)
         return;
 
     //TODO: Log to a CSV file; header row should be written when run starts.
-    if( self->ticks % 100 )
+    if( (self->ticks % 100) == 0 )
         printf(
-            "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
+            "%lu, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
+            self->ticks,
             system_time(self),
             self->rocket->mass,
+            delta_mass,
             VX(self->rocket->position),
             VY(self->rocket->position),
             VX(self->rocket->velocity),
             VY(self->rocket->velocity),
-            0.0,
-            0.0,
-            0.0,
+            planetoid_position_radius(self->planetoid, self->rocket->position),
+            planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius,
+            -1.0,
             self->stats.delta_v,
-            0.0,
-            0.0
+            VX(force),
+            VY(force),
+            self->rocket->throttle,
+            self->rocket->bearing
         );
 }
 

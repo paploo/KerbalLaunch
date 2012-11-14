@@ -16,14 +16,15 @@ Rocket *rocket_init(Rocket *self) {
         self->position.v[i] = 0.0;
         self->velocity.v[i] = 0.0;
     }
-    self->mass = 0.0;
+    self->mass = 15.70;
+    self->empty_mass = 15.70 - 12.0;
 
     self->throttle = 1.0;
     self->bearing = M_PI/2.0;
 
-    self->max_thrust = 200.0;
-    self->isp_vac = 375.0;
-    self->isp_atm = 325.0;
+    self->max_thrust = 215.0;
+    self->isp_vac = 370.0;
+    self->isp_atm = 320.0;
 
     self->frontal_area = 3.14;
     self->drag_coefficient = 0.001;
