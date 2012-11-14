@@ -18,8 +18,8 @@ SOURCES = $(wildcard *.c)
 # Use a replacement rule to get the list of objects.
 OBJECTS = $(SOURCES:.c=.o)
 
-# Explicit rules
-.PHONY : clean all release debug run rune-debug
+# Rules that do not depend on files.
+.PHONY : clean all release debug run run-debug todo
 
 # Build
 all: release
@@ -55,6 +55,9 @@ run:
 # Run with debugger.
 run-debug: debug
 	$(DEBUGGER) $(EXECUTABLE_DEBUG)
+
+todo:
+	grep -REn --color 'TODO' $(HEADERS) $(SOURCES)
 
 # Clean!
 clean: clean-plists
