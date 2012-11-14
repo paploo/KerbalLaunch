@@ -23,6 +23,9 @@ Rocket *rocket_init(Rocket *self) {
     self->isp_vac = 375.0;
     self->isp_atm = 325.0;
 
+    self->frontal_area = 3.14;
+    self->drag_coefficient = 0.001;
+
     return self;
 }
 
@@ -39,8 +42,13 @@ double rocket_thrust(const Rocket *self, double atm) {
 }
 
 Vector rocket_thrust_force(const Rocket *self, double atm) {
-    Vector f_vec = vector();
-    return f_vec;
+    //If out of fuel, no thrust.
+    if(self->mass <= self->empty_mass)
+        return vector();
+    //Claculate thrust force.
+    double f_mag = rocket_thrust(self, atm);
+    double f_azm = vector_azm(self->velocity);
+    return vector_polar(f_mag, f_azm);
 }
 
 double rocket_frontal_area(const Rocket *self) {

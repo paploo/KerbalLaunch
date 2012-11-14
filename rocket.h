@@ -16,7 +16,10 @@ typedef struct Rocket {
     double isp_vac;
     double isp_atm;
 
+    double empty_mass;
+
     double frontal_area;
+    double drag_coefficient;
 } Rocket;
 
 

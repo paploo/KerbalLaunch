@@ -15,8 +15,10 @@ Planetoid *planetoid_alloc(void);
 void planetoid_dealloc(Planetoid *self);
 Planetoid *planetoid_init(Planetoid *self);
 
-double planetoid_atm(Planetoid *self, double radius);
-Vector planetoid_gravitational_force(Planetoid *self, Vector position);
-Vector planetoid_atmospheric_drag(Planetoid *self, Vector position, Vector speed, double frontal_area, double coeff);
+double planetoid_atm(const Planetoid *self, Vector position);
+Vector planetoid_position_radius_vector(const Planetoid *self, Vector position);
+double planetoid_position_radius(const Planetoid *self, Vector position);
+Vector planetoid_gravitational_force(const Planetoid *self, Vector position);
+Vector planetoid_atmospheric_drag(const Planetoid *self, Vector position, Vector speed, double frontal_area, double coeff);
 
 #endif

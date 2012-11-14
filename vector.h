@@ -3,6 +3,9 @@
 
 #define VECTOR_DIMS 2
 
+#define VX(vec) (vec.v[0])
+#define VY(vec) (vec.v[1])
+
 typedef struct Vector {
     double v[2];
 } Vector;

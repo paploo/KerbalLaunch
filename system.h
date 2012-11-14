@@ -6,6 +6,15 @@
 #include "planetoid.h"
 #include "statistics.h"
 
+#define MAX_MISSION_TIME 900.0
+
+typedef enum SystemState {
+    SYSTEM_STATE_READY=0,
+    SYSTEM_STATE_RUNNING,
+    SYSTEM_STATE_SUCCESS,
+    SYSTEM_STATE_ERROR=-1
+} SystemState;
+
 typedef struct System {
     Rocket *rocket;
     Program *throttle_program;
@@ -13,6 +22,7 @@ typedef struct System {
     double delta_t;
 
     double time;
+    SystemState state;
     Statistics stats;
 } System;
 
@@ -22,5 +32,9 @@ System *system_init(System *self);
 
 void system_run(System *self);
 void system_run_one_tick(System *self);
+
+Vector system_net_force(const System *self);
+void system_update_stats(System *self, Vector delta_position, Vector delta_velocity);
+void system_set_throttle(System *self);
 
 #endif
