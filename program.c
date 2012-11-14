@@ -34,7 +34,23 @@ Program *program_init_copy(Program *self, Program *src) {
     return self;
 }
 
-void program_display(Program *self) {
+double program_lookup(const Program *self, const double *table, double altitude, int *error) {
+    if( altitude < self->altitudes[0] ) {
+        *error = 1;
+        return 0.0;
+    }
+
+    size_t i = 0;
+    while(i < self->length-1) {
+        if(  altitude < self->altitudes[i+1] )
+            break;
+        i++;
+    }
+    *error = 0;
+    return table[i];
+}
+
+void program_display(const Program *self) {
     printf("<program\n");
     for(size_t i=0; i<self->length; i++) {
         printf("\t[%lu] %6.0f -> (%0.3f, %0.3f)\n", i, self->altitudes[i], self->throttles[i], self->bearings[i]);

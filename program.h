@@ -13,9 +13,8 @@ void program_dealloc(Program *self);
 Program *program_init(Program *self, size_t length);
 Program *program_init_copy(Program *self, Program *src);
 
-double program_lookup_throttle(double altitude);
-double program_lookup_angle(double altitude);
+double program_lookup(const Program *self, const double *table, double input, int *error);
 
-void program_display(Program *self);
+void program_display(const Program *self);
 
 #endif
