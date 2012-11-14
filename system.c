@@ -35,7 +35,10 @@ void system_run(System *self) {
     system_log_header(self);
 
     //Run
+    assert(self->state == SYSTEM_STATE_READY);
+    self->state = SYSTEM_STATE_RUNNING;
     double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
+
     while( altitude >= 0.0 ) {
         if( system_time(self) > MAX_MISSION_TIME ) {
             self->state = SYSTEM_STATE_ERROR;
@@ -44,15 +47,18 @@ void system_run(System *self) {
         system_run_one_tick(self);
         altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
     }
-    self->state = SYSTEM_STATE_SUCCESS;
+
+    if(self->state >= 0)
+        self->state = SYSTEM_STATE_SUCCESS;
 
     //Cleanup
     self->stats.mission_time = system_time(self);
 }
 
 void system_run_one_tick(System *self) {
+    double delta_t = self->delta_t;
 #ifdef DEBUG
-    printf("n: %lu, t: %f\n", self->ticks, system_time(self));
+    printf("n: %lu, t: %f, dt: %f\n", self->ticks, system_time(self), delta_t);
 #endif
 
     //Set thrust according to program.
@@ -60,14 +66,13 @@ void system_run_one_tick(System *self) {
 
     //Calcualte the mass and mass change.
     double m = self->rocket->mass;
-    double dm = rocket_mass_flow(self->rocket, planetoid_atm(self->planetoid, self->rocket->position));
+    double dm = rocket_mass_flow(self->rocket, planetoid_atm(self->planetoid, self->rocket->position)) * delta_t;
 
     //Get net force and acceleration.
     Vector f = system_net_force(self);
     Vector a = vector_rect(f.v[0]/m, f.v[1]/m);
 
     //Move based on the acceleration.
-    double delta_t = self->delta_t;
     double dvx = a.v[0]*delta_t;
     double dvy = a.v[1]*delta_t;
     Vector delta_v = vector_rect(dvx,dvy);
