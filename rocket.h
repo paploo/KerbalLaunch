@@ -11,6 +11,7 @@ typedef struct Rocket {
     double mass;
 
     double throttle;
+    double bearing;
 
     double max_thrust;
     double isp_vac;

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 
 #include "rocket.h"
 
@@ -18,6 +19,7 @@ Rocket *rocket_init(Rocket *self) {
     self->mass = 0.0;
 
     self->throttle = 1.0;
+    self->bearing = M_PI/2.0;
 
     self->max_thrust = 200.0;
     self->isp_vac = 375.0;

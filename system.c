@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "system.h"
 
@@ -13,13 +14,17 @@ void system_dealloc(System *self) {
 
 System *system_init(System *self) {
     self->rocket = NULL;
-    self->throttle_program = NULL;
     self->planetoid = NULL;
+    self->throttle_program = NULL;
+    self->bearing_program = NULL;
 
     self->delta_t = 1.0/100.0;
 
     self->state = SYSTEM_STATE_READY;
     self->ticks = 0;
+
+    self->logging = 0;
+
     statistics_init(&self->stats);
 
     return self;
@@ -115,24 +120,51 @@ void system_update_stats(System *self, Vector delta_position, Vector delta_veloc
 }
 
 void system_log_header(const System *self) {
-    printf("time, x, y, vx, vy, delta_v\n");
+    if(!self->logging)
+        return;
+
+    printf("time, m, x, y, vx, vy, r, alt, azm, delta_v, throttle, angle\n");
 }
 
 void system_log_tick(const System *self, Vector delta_position, Vector delta_velocity) {
+    if(!self->logging)
+        return;
+
     //TODO: Log to a CSV file; header row should be written when run starts.
     if( self->ticks % 100 )
         printf(
-            "%f, %f, %f, %f, %f, %f\n",
+            "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
             system_time(self),
+            self->rocket->mass,
             VX(self->rocket->position),
             VY(self->rocket->position),
             VX(self->rocket->velocity),
             VY(self->rocket->velocity),
-            self->stats.delta_v
+            0.0,
+            0.0,
+            0.0,
+            self->stats.delta_v,
+            0.0,
+            0.0
         );
 }
 
 void system_set_throttle(System *self) {
-    //TODO: Set Thrust according to program!
-    self->rocket->throttle = 1.0;
+    double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
+
+    int error=0;
+    double throttle = program_lookup(self->throttle_program, altitude, &error);
+    assert(error==0);
+
+    self->rocket->throttle = throttle;
+}
+
+void system_set_bearing(System *self) {
+    double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
+
+    int error=0;
+    double bearing = program_lookup(self->bearing_program, altitude, &error);
+    assert(error==0);
+
+    self->rocket->bearing = bearing;
 }

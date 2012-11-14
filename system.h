@@ -18,11 +18,15 @@ typedef enum SystemState {
 typedef struct System {
     Rocket *rocket;
     Program *throttle_program;
+    Program *bearing_program;
     Planetoid *planetoid;
     double delta_t;
 
     unsigned long ticks;
     SystemState state;
+
+    int logging;
+
     Statistics stats;
 } System;
 
@@ -37,6 +41,7 @@ double system_time(const System *self);
 
 Vector system_net_force(const System *self);
 void system_set_throttle(System *self);
+void system_set_bearing(System *self);
 void system_update_stats(System *self, Vector delta_position, Vector delta_velocity);
 void system_log_header(const System *self);
 void system_log_tick(const System *self, Vector delta_position, Vector delta_velocity);
