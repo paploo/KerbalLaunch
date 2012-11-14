@@ -14,6 +14,7 @@ Statistics *statistics_init(Statistics *stats) {
     stats->max_radius = 0.0;
     stats->max_radius_time = 0.0;
     stats->distance_travelled = 0.0;
+    stats->delta_v = 0.0;
     stats->mission_time = 0.0;
 
     return stats;

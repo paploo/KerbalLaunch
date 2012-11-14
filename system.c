@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "system.h"
 
@@ -18,21 +19,28 @@ System *system_init(System *self) {
     self->delta_t = 1.0/100.0;
 
     self->state = SYSTEM_STATE_READY;
-    self->time = 0.0;
+    self->ticks = 0;
     statistics_init(&self->stats);
 
     return self;
 }
 
 void system_run(System *self) {
+    //Setup
+    system_log_header(self);
+
+    //Run
     while( self->rocket->position.v[0] > 0.0 ) {
-        if( self->time > MAX_MISSION_TIME ) {
+        if( system_time(self) > MAX_MISSION_TIME ) {
             self->state = SYSTEM_STATE_ERROR;
             break;
         }
         system_run_one_tick(self);
     }
     self->state = SYSTEM_STATE_SUCCESS;
+
+    //Cleanup
+    self->stats.mission_time = system_time(self);
 }
 
 void system_run_one_tick(System *self) {
@@ -66,8 +74,11 @@ void system_run_one_tick(System *self) {
     system_log_tick(self, delta_r, delta_v);
 
     //Increment time.
-    self->time += self->delta_t;
+    self->ticks++;
+}
 
+double system_time(const System *self) {
+    return self->ticks * self->delta_t;
 }
 
 Vector system_net_force(const System *self) {
@@ -94,15 +105,31 @@ Vector system_net_force(const System *self) {
 
 void system_update_stats(System *self, Vector delta_position, Vector delta_velocity) {
     self->stats.distance_travelled += vector_mag(delta_position);
+    self->stats.delta_v += vector_mag(delta_velocity);
 
     double radius = planetoid_position_radius(self->planetoid, self->rocket->position);
     if(radius > self->stats.max_radius) {
         self->stats.max_radius = radius;
-        self->stats.max_radius_time = self->time;
+        self->stats.max_radius_time = system_time(self);
     }
 }
 
-void system_log_tick(System *self, Vector delta_position, Vector delta_velocity){
+void system_log_header(const System *self) {
+    printf("time, x, y, vx, vy, delta_v\n");
+}
+
+void system_log_tick(const System *self, Vector delta_position, Vector delta_velocity) {
+    //TODO: Log to a CSV file; header row should be written when run starts.
+    if( self->ticks % 100 )
+        printf(
+            "%f, %f, %f, %f, %f, %f\n",
+            system_time(self),
+            VX(self->rocket->position),
+            VY(self->rocket->position),
+            VX(self->rocket->velocity),
+            VY(self->rocket->velocity),
+            self->stats.delta_v
+        );
 }
 
 void system_set_throttle(System *self) {

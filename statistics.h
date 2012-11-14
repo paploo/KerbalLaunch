@@ -5,6 +5,7 @@ typedef struct Statistics {
     double max_radius;
     double max_radius_time;
     double distance_travelled;
+    double delta_v;
     double mission_time;
 } Statistics;
 

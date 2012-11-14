@@ -21,7 +21,7 @@ typedef struct System {
     Planetoid *planetoid;
     double delta_t;
 
-    double time;
+    unsigned long ticks;
     SystemState state;
     Statistics stats;
 } System;
@@ -33,9 +33,12 @@ System *system_init(System *self);
 void system_run(System *self);
 void system_run_one_tick(System *self);
 
+double system_time(const System *self);
+
 Vector system_net_force(const System *self);
 void system_set_throttle(System *self);
 void system_update_stats(System *self, Vector delta_position, Vector delta_velocity);
-void system_log_tick(System *self, Vector delta_position, Vector delta_velocity);
+void system_log_header(const System *self);
+void system_log_tick(const System *self, Vector delta_position, Vector delta_velocity);
 
 #endif
