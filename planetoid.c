@@ -41,12 +41,13 @@ double planetoid_position_radius(const Planetoid *self, Vector position) {
     return vector_mag( planetoid_position_radius_vector(self, position) );
 }
 
-Vector planetoid_gravitational_force(const Planetoid *self, Vector position) {
+Vector planetoid_gravitational_force(const Planetoid *self, double mass, Vector position) {
     //Compute the relative position vector, r
     Vector r_vec = planetoid_position_radius_vector(self, position);
+    double r = vector_mag(r_vec);
 
     //Compute the gravitational force magnitude. Note that it is negative because it goes opposite the position.
-    double f_mag = -(self->gravitational_parameter)/vector_mag(r_vec);
+    double f_mag = -(mass * self->gravitational_parameter)/(r*r);
 
     //Compute the gravitational force angle. We take into account it's oppositeness with the negative magnitude.
     double f_azm = vector_azm(r_vec);

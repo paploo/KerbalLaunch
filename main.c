@@ -41,6 +41,8 @@ int simulate() {
 
     //Run
     system_run(system);
+    //system_log_header(system);
+    //system_run_one_tick(system);
 
     //Output stats
     printf("state     : %d\n", system->state);

@@ -51,26 +51,37 @@ void system_run(System *self) {
 }
 
 void system_run_one_tick(System *self) {
+#ifdef DEBUG
+    printf("n: %lu, t: %f\n", self->ticks, system_time(self));
+#endif
+
     //Set thrust according to program.
     system_set_throttle(self);
 
     //Calcualte the mass and mass change.
     double m = self->rocket->mass;
     double dm = rocket_mass_flow(self->rocket, planetoid_atm(self->planetoid, self->rocket->position));
-    self->rocket->mass -= dm;
 
     //Get net force and acceleration.
     Vector f = system_net_force(self);
     Vector a = vector_rect(f.v[0]/m, f.v[1]/m);
 
     //Move based on the acceleration.
-    double dvx = a.v[0]*self->delta_t + self->rocket->velocity.v[0];
-    double dvy = a.v[1]*self->delta_t + self->rocket->velocity.v[1];
+    double delta_t = self->delta_t;
+    double dvx = a.v[0]*delta_t;
+    double dvy = a.v[1]*delta_t;
     Vector delta_v = vector_rect(dvx,dvy);
-    double dx = 0.5*a.v[0]*self->delta_t*self->delta_t + self->rocket->velocity.v[0]*self->delta_t + self->rocket->position.v[0];
-    double dy = 0.5*a.v[1]*self->delta_t*self->delta_t + self->rocket->velocity.v[1]*self->delta_t + self->rocket->position.v[1];
+    double dx = 0.5*a.v[0]*delta_t*delta_t + self->rocket->velocity.v[0]*delta_t;
+    double dy = 0.5*a.v[1]*delta_t*delta_t + self->rocket->velocity.v[1]*delta_t;
     Vector delta_r = vector_rect(dx,dy);
 
+#ifdef DEBUG
+    printf("dm: %f, dv: (%f, %f), dr: (%f, %f)\n", dm, dvx, dvy, dx, dy);
+    printf("m: %f, v: (%f, %f), r: (%f, %f)\n", m, VX(self->rocket->velocity), VY(self->rocket->velocity), VX(self->rocket->position), VY(self->rocket->position));
+#endif
+
+    // Now apply the changes.
+    self->rocket->mass -= dm;
     self->rocket->velocity.v[0] += dvx;
     self->rocket->velocity.v[1] += dvy;
     self->rocket->position.v[0] += dx;
@@ -90,7 +101,7 @@ double system_time(const System *self) {
 
 Vector system_net_force(const System *self) {
     // Get gravity.
-    Vector gravity = planetoid_gravitational_force(self->planetoid, self->rocket->position);
+    Vector gravity = planetoid_gravitational_force(self->planetoid, self->rocket->mass, self->rocket->position);
 
     // Get air resistance.
     Vector air_resistance = planetoid_atmospheric_drag(
@@ -103,6 +114,10 @@ Vector system_net_force(const System *self) {
 
     // Get thrust.
     Vector thrust = rocket_thrust_force(self->rocket, planetoid_atm(self->planetoid, self->rocket->position));
+
+#ifdef DEBUG
+    printf("gravity:(%f, %f); thrust:(%f, %f), air:(%f, %f)\n", VX(gravity), VY(gravity), VX(thrust), VY(thrust), VX(air_resistance), VY(air_resistance));
+#endif
 
     // Sum.
     double fx = VX(gravity) + VX(air_resistance) + VX(thrust);

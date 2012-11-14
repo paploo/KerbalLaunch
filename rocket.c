@@ -41,16 +41,21 @@ double rocket_mass_flow(const Rocket *self, double atm) {
 }
 
 double rocket_thrust(const Rocket *self, double atm) {
-    return (self->throttle * self->max_thrust);
+    //If out of fuel, no thrust.
+    if(self->mass <= self->empty_mass)
+        return 0.0;
+    else
+        return self->throttle * self->max_thrust;
 }
 
 Vector rocket_thrust_force(const Rocket *self, double atm) {
-    //If out of fuel, no thrust.
-    if(self->mass <= self->empty_mass)
-        return vector();
-    //Claculate thrust force.
+    //Calculate thrust force.
     double f_mag = rocket_thrust(self, atm);
-    double f_azm = vector_azm(self->velocity);
+
+    //TODO: calculate thrust based off of bearing relative to position to planetoid!
+    double f_azm = self->bearing;
+
+    // Return.
     return vector_polar(f_mag, f_azm);
 }
 
