@@ -8,6 +8,8 @@
 
 void test();
 int simulate();
+Rocket *init_small_rocket(Rocket *rocket);
+Rocket *init_large_rocket(Rocket *rocket);
 
 int main(){
     return simulate();
@@ -18,7 +20,7 @@ int simulate() {
     Planetoid *kerbin = planetoid_init(planetoid_alloc());
 
     //Build the rocket
-    Rocket *rocket = rocket_init(rocket_alloc());
+    Rocket *rocket = init_small_rocket(rocket_alloc());
     rocket->position.v[1] = kerbin->radius + 10.0;
 
     //Build the programs
@@ -37,7 +39,7 @@ int simulate() {
     system->rocket = rocket;
     system->throttle_program = throttle_program;
     system->bearing_program = bearing_program;
-    system->logging = 1;
+    system->logging = 0;
 
     //Run
     system_run(system);
@@ -62,6 +64,38 @@ int simulate() {
     planetoid_dealloc(kerbin);
 
     return 0;
+}
+
+Rocket *init_small_rocket(Rocket *rocket) {
+    rocket_init(rocket);
+
+    rocket->mass = 4.45;
+    rocket->empty_mass = 4.45-2.0;
+
+    rocket->max_thrust = 215.0;
+    rocket->isp_vac = 370.0;
+    rocket->isp_atm = 320.0;
+
+    rocket->frontal_area = 3.14;
+    rocket->drag_coefficient = 0.001;
+
+    return rocket;
+}
+
+Rocket *init_large_rocket(Rocket *rocket) {
+    rocket_init(rocket);
+
+    rocket->mass = 15.70;
+    rocket->empty_mass = 15.70-12.0;
+
+    rocket->max_thrust = 215.0;
+    rocket->isp_vac = 370.0;
+    rocket->isp_atm = 320.0;
+
+    rocket->frontal_area = 3.14;
+    rocket->drag_coefficient = 0.001;
+
+    return rocket;
 }
 
 

@@ -28,7 +28,7 @@ double planetoid_atm(const Planetoid *self, Vector position) {
     double r = planetoid_position_radius(self, position);
     double a = r - self->radius;
     if( a >= 0 )
-        return exp(-r / self->atmospheric_attenuation);
+        return exp(-a / self->atmospheric_attenuation);
     else
         return 1.0;
 }
