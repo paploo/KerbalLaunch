@@ -51,8 +51,10 @@ void system_run_one_tick(System *self) {
     //Move based on the acceleration.
     double dvx = a.v[0]*self->delta_t + self->rocket->velocity.v[0];
     double dvy = a.v[1]*self->delta_t + self->rocket->velocity.v[1];
+    Vector delta_v = vector_rect(dvx,dvy);
     double dx = 0.5*a.v[0]*self->delta_t*self->delta_t + self->rocket->velocity.v[0]*self->delta_t + self->rocket->position.v[0];
     double dy = 0.5*a.v[1]*self->delta_t*self->delta_t + self->rocket->velocity.v[1]*self->delta_t + self->rocket->position.v[1];
+    Vector delta_r = vector_rect(dx,dy);
 
     self->rocket->velocity.v[0] += dvx;
     self->rocket->velocity.v[1] += dvy;
@@ -60,7 +62,8 @@ void system_run_one_tick(System *self) {
     self->rocket->position.v[1] += dy;
 
     //Then record the statistics.
-    system_update_stats(self, vector_rect(dx,dy), vector_rect(dvx,dvy));
+    system_update_stats(self, delta_r, delta_v);
+    system_log_tick(self, delta_r, delta_v);
 
     //Increment time.
     self->time += self->delta_t;
@@ -97,6 +100,9 @@ void system_update_stats(System *self, Vector delta_position, Vector delta_veloc
         self->stats.max_radius = radius;
         self->stats.max_radius_time = self->time;
     }
+}
+
+void system_log_tick(System *self, Vector delta_position, Vector delta_velocity){
 }
 
 void system_set_throttle(System *self) {

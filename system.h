@@ -34,7 +34,8 @@ void system_run(System *self);
 void system_run_one_tick(System *self);
 
 Vector system_net_force(const System *self);
-void system_update_stats(System *self, Vector delta_position, Vector delta_velocity);
 void system_set_throttle(System *self);
+void system_update_stats(System *self, Vector delta_position, Vector delta_velocity);
+void system_log_tick(System *self, Vector delta_position, Vector delta_velocity);
 
 #endif
