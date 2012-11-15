@@ -19,8 +19,7 @@ typedef struct Rocket {
 
     double empty_mass;
 
-    double frontal_area;
-    double drag_coefficient;
+    double max_drag;
 } Rocket;
 
 
@@ -32,6 +31,6 @@ double rocket_isp(const Rocket *self, double atm);
 double rocket_thrust(const Rocket *self, double atm);
 Vector rocket_thrust_force(const Rocket *self, double atm);
 double rocket_mass_flow(const Rocket *self, double atm);
-double rocket_frontal_area(const Rocket *self);
+double rocket_drag(const Rocket *self);
 
 #endif

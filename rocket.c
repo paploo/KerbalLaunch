@@ -26,8 +26,7 @@ Rocket *rocket_init(Rocket *self) {
     self->isp_vac = 370.0;
     self->isp_atm = 320.0;
 
-    self->frontal_area = 3.14;
-    self->drag_coefficient = 0.001;
+    self->max_drag = 0.20;
 
     return self;
 }
@@ -59,7 +58,7 @@ Vector rocket_thrust_force(const Rocket *self, double atm) {
     return vector_polar(f_mag, f_azm);
 }
 
-double rocket_frontal_area(const Rocket *self) {
+double rocket_drag(const Rocket *self) {
     //TODO: Change so that we smoothly change from the frontal area to the side_area depending on velocity vector angle.
-    return self->frontal_area;
+    return self->max_drag;
 }

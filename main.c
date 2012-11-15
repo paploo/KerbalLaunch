@@ -21,7 +21,7 @@ int simulate() {
 
     //Build the rocket
     Rocket *rocket = init_small_rocket(rocket_alloc());
-    rocket->position.v[1] = kerbin->radius + 10.0;
+    rocket->position.v[1] = kerbin->radius;
 
     //Build the programs
     Program *throttle_program = program_init(program_alloc(), 1);
@@ -76,8 +76,7 @@ Rocket *init_small_rocket(Rocket *rocket) {
     rocket->isp_vac = 370.0;
     rocket->isp_atm = 320.0;
 
-    rocket->frontal_area = 3.14;
-    rocket->drag_coefficient = 0.001;
+    rocket->max_drag = 0.2;
 
     return rocket;
 }
@@ -92,8 +91,7 @@ Rocket *init_large_rocket(Rocket *rocket) {
     rocket->isp_vac = 370.0;
     rocket->isp_atm = 320.0;
 
-    rocket->frontal_area = 3.14;
-    rocket->drag_coefficient = 0.001;
+    rocket->max_drag = 0.2;
 
     return rocket;
 }

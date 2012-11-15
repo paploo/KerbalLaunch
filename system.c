@@ -113,8 +113,8 @@ Vector system_net_force(const System *self) {
         self->planetoid,
         self->rocket->position,
         self->rocket->velocity,
-        rocket_frontal_area(self->rocket),
-        self->rocket->drag_coefficient
+        rocket_drag(self->rocket),
+        self->rocket->mass
     );
 
     // Get thrust.
