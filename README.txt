@@ -24,6 +24,9 @@ parameters as well).
 It is also planned to be able to run a flight program and output a CSV file of
 its simulated trajectory for further analysis.
 
+Rough benchmarks on 2.8 GHz Intel Core Duo give about 2 million ticks/second on
+a single thread.
+
 DESIGN
 
 The program can be divided up into the simulation of a physical system, and the

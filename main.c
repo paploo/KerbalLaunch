@@ -21,7 +21,7 @@ int simulate() {
 
     //Build the rocket
     Rocket *rocket = init_small_rocket(rocket_alloc());
-    rocket->position.v[1] = kerbin->radius + 72.0;
+    rocket->position.v[1] = kerbin->radius + 72.0; // Small rocket sits at 72.0m on pad.
 
     //Build the programs
     Program *throttle_program = program_init(program_alloc(), 1);
@@ -39,7 +39,7 @@ int simulate() {
     system->rocket = rocket;
     system->throttle_program = throttle_program;
     system->altitude_angle_program = altitude_angle_program;
-    system->logging = true;
+    system->logging = false;
 
     //Run
     system_run(system);

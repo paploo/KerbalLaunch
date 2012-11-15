@@ -4,6 +4,9 @@
 
 #include "system.h"
 
+#define SYSTEM_TICKS_PER_SECOND 1000
+#define LOG_INTERVAL_SECONDS 1
+
 System *system_alloc(void) {
     return (System *)malloc(sizeof(System));
 }
@@ -18,7 +21,7 @@ System *system_init(System *self) {
     self->throttle_program = NULL;
     self->altitude_angle_program = NULL;
 
-    self->delta_t = 1.0/100.0;
+    self->delta_t = 1.0/SYSTEM_TICKS_PER_SECOND;
 
     self->state = SYSTEM_STATE_READY;
     self->ticks = 0;
@@ -38,14 +41,16 @@ void system_run(System *self) {
     assert(self->state == SYSTEM_STATE_READY);
     self->state = SYSTEM_STATE_RUNNING;
     double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
+    double radial_velocity = self->rocket->velocity.v[0]; //TODO: This needs to calculate the radial velocity in relation to the planet, not the y velocity!
 
-    while( altitude >= 0.0 ) {
+    while( altitude >= 0.0 && radial_velocity >= 0.0 ) {
         if( system_time(self) > MAX_MISSION_TIME ) {
             self->state = SYSTEM_STATE_ERROR;
             break;
         }
         system_run_one_tick(self);
         altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
+        radial_velocity = self->rocket->velocity.v[0];
     }
 
     if(self->state >= 0)
@@ -153,7 +158,7 @@ void system_log_tick(const System *self, double delta_mass, Vector force, Vector
         return;
 
     //TODO: Log to a CSV file; header row should be written when run starts.
-    if( (self->ticks % 100) == 0 )
+    if( (self->ticks % (LOG_INTERVAL_SECONDS*SYSTEM_TICKS_PER_SECOND)) == 0 )
         printf(
             "%lu, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
             self->ticks,
