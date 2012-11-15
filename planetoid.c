@@ -21,7 +21,6 @@ Planetoid *planetoid_init(Planetoid *self) {
 
     self->atmospheric_attenuation = 5000.0;
     self->max_atmospheric_altitude = self->atmospheric_attenuation * log(1e6);
-    printf("*** %f\n", self->max_atmospheric_altitude);
 
     return self;
 }
