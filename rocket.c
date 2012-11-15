@@ -20,7 +20,7 @@ Rocket *rocket_init(Rocket *self) {
     self->empty_mass = 15.70 - 12.0;
 
     self->throttle = 1.0;
-    self->bearing = M_PI/2.0;
+    self->altitude_angle = M_PI/2.0;
 
     self->max_thrust = 215.0;
     self->isp_vac = 370.0;
@@ -51,8 +51,8 @@ Vector rocket_thrust_force(const Rocket *self, double atm) {
     //Calculate thrust force.
     double f_mag = rocket_thrust(self, atm);
 
-    //TODO: calculate thrust based off of bearing relative to position to planetoid!
-    double f_azm = self->bearing;
+    //TODO: calculate thrust based off of altitude_angle relative to position to planetoid!
+    double f_azm = self->altitude_angle;
 
     // Return.
     return vector_polar(f_mag, f_azm);

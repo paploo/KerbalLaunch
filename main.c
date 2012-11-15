@@ -28,9 +28,9 @@ int simulate() {
     throttle_program->altitudes[0] = -600000.0;
     throttle_program->settings[0] = 1.0;
 
-    Program *bearing_program = program_init(program_alloc(), 1);
-    bearing_program->altitudes[0] = -600000.0;
-    bearing_program->settings[0] = M_PI/2.0;
+    Program *altitude_angle_program = program_init(program_alloc(), 1);
+    altitude_angle_program->altitudes[0] = -600000.0;
+    altitude_angle_program->settings[0] = M_PI/2.0;
 
 
     //Build the system
@@ -38,7 +38,7 @@ int simulate() {
     system->planetoid = kerbin;
     system->rocket = rocket;
     system->throttle_program = throttle_program;
-    system->bearing_program = bearing_program;
+    system->altitude_angle_program = altitude_angle_program;
     system->logging = 0;
 
     //Run
@@ -59,7 +59,7 @@ int simulate() {
     //Cleanup
     system_dealloc(system);
     program_dealloc(throttle_program);
-    program_dealloc(bearing_program);
+    program_dealloc(altitude_angle_program);
     rocket_dealloc(rocket);
     planetoid_dealloc(kerbin);
 

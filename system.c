@@ -16,7 +16,7 @@ System *system_init(System *self) {
     self->rocket = NULL;
     self->planetoid = NULL;
     self->throttle_program = NULL;
-    self->bearing_program = NULL;
+    self->altitude_angle_program = NULL;
 
     self->delta_t = 1.0/100.0;
 
@@ -145,7 +145,7 @@ void system_log_header(const System *self) {
     if(!self->logging)
         return;
 
-    printf("tick, time, m, dm, x, y, vx, vy, r, alt, azm, delta_v, fx, fy, throttle, bearing\n");
+    printf("tick, time, m, dm, x, y, vx, vy, r, alt, azm, delta_v, fx, fy, throttle, altitude_angle\n");
 }
 
 void system_log_tick(const System *self, double delta_mass, Vector force, Vector acceleration, Vector delta_position, Vector delta_velocity) {
@@ -171,7 +171,7 @@ void system_log_tick(const System *self, double delta_mass, Vector force, Vector
             VX(force),
             VY(force),
             self->rocket->throttle,
-            self->rocket->bearing
+            self->rocket->altitude_angle
         );
 }
 
@@ -185,12 +185,12 @@ void system_set_throttle(System *self) {
     self->rocket->throttle = throttle;
 }
 
-void system_set_bearing(System *self) {
+void system_set_altitude_angle(System *self) {
     double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
 
     int error=0;
-    double bearing = program_lookup(self->bearing_program, altitude, &error);
+    double altitude_angle = program_lookup(self->altitude_angle_program, altitude, &error);
     assert(error==0);
 
-    self->rocket->bearing = bearing;
+    self->rocket->altitude_angle = altitude_angle;
 }
