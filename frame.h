@@ -29,4 +29,6 @@ typedef struct Frame {
     double altitude_angle;
 } Frame;
 
+void frame_display(const Frame *frame);
+
 #endif

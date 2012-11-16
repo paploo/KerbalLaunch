@@ -47,8 +47,8 @@ double system_time(const System *self);
 Vector system_net_force(const System *self);
 void system_set_throttle(System *self);
 void system_set_altitude_angle(System *self);
-void system_update_stats(System *self, Vector delta_position, Vector delta_velocity);
+void system_update_stats(System *self);
 void system_log_header(const System *self);
-void system_log_tick(const System *self, double delta_mass, Vector force, Vector acceleration, Vector delta_position, Vector delta_velocity);
+void system_log_tick(const System *self);
 
 #endif

@@ -35,6 +35,12 @@ System *system_init(System *self) {
 }
 
 void system_run(System *self) {
+    //Sanity check
+    assert(self->rocket);
+    assert(self->planetoid);
+    assert(self->throttle_program);
+    assert(self->altitude_angle_program);
+
     //Setup
     system_log_header(self);
 
@@ -117,8 +123,11 @@ void system_run_one_tick(System *self) {
     self->rocket->position.v[1] += dy;
 
     //Then record the statistics.
-    system_update_stats(self, delta_r, delta_v);
-    system_log_tick(self, dm, f, a, delta_r, delta_v);
+    system_update_stats(self);
+    system_log_tick(self);
+
+    //Cleanup
+    self->frame = NULL;
 
     //Increment time.
     self->ticks++;
@@ -163,14 +172,14 @@ Vector system_net_force(const System *self) {
     return vector_rect(fx, fy);
 }
 
-void system_update_stats(System *self, Vector delta_position, Vector delta_velocity) {
-    self->stats.distance_travelled += vector_mag(delta_position);
-    self->stats.delta_v += vector_mag(delta_velocity);
+void system_update_stats(System *self) {
+    self->stats.distance_travelled += vector_mag(self->frame->delta_position);
+    self->stats.delta_v += vector_mag(self->frame->delta_velocity);
 
-    double radius = planetoid_position_radius(self->planetoid, self->rocket->position);
+    double radius = planetoid_position_radius(self->planetoid, self->frame->position);
     if(radius > self->stats.max_radius) {
         self->stats.max_radius = radius;
-        self->stats.max_radius_time = system_time(self);
+        self->stats.max_radius_time = self->frame->t;
     }
 }
 
@@ -178,33 +187,32 @@ void system_log_header(const System *self) {
     if(!self->logging)
         return;
 
-    printf("tick, time, m, dm, x, y, vx, vy, r, alt, azm, delta_v, fx, fy, throttle, altitude_angle\n");
+    printf("tick, time, m, dm, x, y, vx, vy, r, alt, azm, fx, fy, throttle, altitude_angle\n");
 }
 
-void system_log_tick(const System *self, double delta_mass, Vector force, Vector acceleration, Vector delta_position, Vector delta_velocity) {
+void system_log_tick(const System *self) {
     if(!self->logging)
         return;
 
     //TODO: Log to a CSV file; header row should be written when run starts.
     if( (self->ticks % (LOG_INTERVAL_SECONDS*SYSTEM_TICKS_PER_SECOND)) == 0 )
         printf(
-            "%lu, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
-            self->ticks,
-            system_time(self),
-            self->rocket->mass,
-            delta_mass,
-            VX(self->rocket->position),
-            VY(self->rocket->position),
-            VX(self->rocket->velocity),
-            VY(self->rocket->velocity),
-            planetoid_position_radius(self->planetoid, self->rocket->position),
-            planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius,
+            "%lu, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
+            self->frame->ticks,
+            self->frame->t,
+            self->frame->mass,
+            self->frame->delta_mass,
+            VX(self->frame->position),
+            VY(self->frame->position),
+            VX(self->frame->velocity),
+            VY(self->frame->velocity),
+            planetoid_position_radius(self->planetoid, self->frame->position),
+            planetoid_position_radius(self->planetoid, self->frame->position) - self->planetoid->radius,
             -1.0,
-            self->stats.delta_v,
-            VX(force),
-            VY(force),
-            self->rocket->throttle,
-            self->rocket->altitude_angle
+            VX(self->frame->force),
+            VY(self->frame->force),
+            self->frame->throttle,
+            self->frame->altitude_angle
         );
 }
 
