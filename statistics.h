@@ -2,11 +2,14 @@
 #define KERBAL_LAUNCH_STATISTICS_H
 
 typedef struct Statistics {
+    double mission_time;
     double max_radius;
     double max_radius_time;
     double distance_travelled;
-    double delta_v;
-    double mission_time;
+
+    double delta_v_thrust;
+    double delta_v_drag;
+    double delta_v_gravity;
 } Statistics;
 
 Statistics *statistics_alloc(void);

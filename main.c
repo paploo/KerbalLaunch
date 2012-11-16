@@ -54,7 +54,9 @@ int simulate() {
     printf("time      : %f s\n", stats->mission_time);
     printf("max_radius: %f m @ %f sec\n", stats->max_radius, stats->max_radius_time);
     printf("distance  : %f m\n", stats->distance_travelled);
-    printf("delta_v   : %f m/s\n", stats->delta_v);
+    printf("delta_v_thrust   : %f m/s\n", stats->delta_v_thrust);
+    printf("delta_v_drag     : %f m/s\n", stats->delta_v_drag);
+    printf("delta_v_gravity  : %f m/s\n", stats->delta_v_gravity);
 
     //Cleanup
     system_dealloc(system);

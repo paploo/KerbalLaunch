@@ -11,11 +11,14 @@ void statistics_dealloc(Statistics *stats) {
 }
 
 Statistics *statistics_init(Statistics *stats) {
+    stats->mission_time = 0.0;
     stats->max_radius = 0.0;
     stats->max_radius_time = 0.0;
     stats->distance_travelled = 0.0;
-    stats->delta_v = 0.0;
-    stats->mission_time = 0.0;
+
+    stats->delta_v_thrust = 0.0;
+    stats->delta_v_drag = 0.0;
+    stats->delta_v_gravity = 0.0;
 
     return stats;
 }

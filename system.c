@@ -172,15 +172,26 @@ Vector system_net_force(const System *self) {
     return vector_rect(fx, fy);
 }
 
-void system_update_stats(System *self) {
-    self->stats.distance_travelled += vector_mag(self->frame->delta_position);
-    self->stats.delta_v += vector_mag(self->frame->delta_velocity);
+void system_set_throttle(System *self) {
+    double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
 
-    double radius = planetoid_position_radius(self->planetoid, self->frame->position);
-    if(radius > self->stats.max_radius) {
-        self->stats.max_radius = radius;
-        self->stats.max_radius_time = self->frame->t;
-    }
+    int error=0;
+    double throttle = program_lookup(self->throttle_program, altitude, &error);
+    assert(error==0);
+
+    self->rocket->throttle = throttle;
+    self->frame->throttle = throttle;
+}
+
+void system_set_altitude_angle(System *self) {
+    double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
+
+    int error=0;
+    double altitude_angle = program_lookup(self->altitude_angle_program, altitude, &error);
+    assert(error==0);
+
+    self->rocket->altitude_angle = altitude_angle;
+    self->frame->altitude_angle = altitude_angle;
 }
 
 void system_log_header(const System *self) {
@@ -188,6 +199,21 @@ void system_log_header(const System *self) {
         return;
 
     printf("tick, time, m, dm, x, y, vx, vy, r, alt, azm, fx, fy, throttle, altitude_angle\n");
+}
+
+void system_update_stats(System *self) {
+    self->stats.distance_travelled += vector_mag(self->frame->delta_position);
+
+    double alpha = self->frame->delta_t / self->frame->mass;
+    self->stats.delta_v_thrust += alpha * vector_mag(self->frame->force_thrust);
+    self->stats.delta_v_drag += alpha * vector_mag(self->frame->force_drag);
+    self->stats.delta_v_gravity += alpha * vector_mag(self->frame->force_gravity);
+
+    double radius = planetoid_position_radius(self->planetoid, self->frame->position);
+    if(radius > self->stats.max_radius) {
+        self->stats.max_radius = radius;
+        self->stats.max_radius_time = self->frame->t;
+    }
 }
 
 void system_log_tick(const System *self) {
@@ -214,26 +240,4 @@ void system_log_tick(const System *self) {
             self->frame->throttle,
             self->frame->altitude_angle
         );
-}
-
-void system_set_throttle(System *self) {
-    double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
-
-    int error=0;
-    double throttle = program_lookup(self->throttle_program, altitude, &error);
-    assert(error==0);
-
-    self->rocket->throttle = throttle;
-    self->frame->throttle = throttle;
-}
-
-void system_set_altitude_angle(System *self) {
-    double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
-
-    int error=0;
-    double altitude_angle = program_lookup(self->altitude_angle_program, altitude, &error);
-    assert(error==0);
-
-    self->rocket->altitude_angle = altitude_angle;
-    self->frame->altitude_angle = altitude_angle;
 }
