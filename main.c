@@ -52,7 +52,7 @@ int simulate() {
 
     Statistics *stats = &system->stats;
     printf("time      : %f s\n", stats->mission_time);
-    printf("max_radius: %f m @ %f sec\n", stats->max_radius, stats->max_radius_time);
+    printf("max_alt: %f m @ %f sec\n", stats->max_altitude, stats->max_radius_time);
     printf("distance  : %f m\n", stats->distance_travelled);
     printf("delta_v_thrust   : %f m/s\n", stats->delta_v_thrust);
     printf("delta_v_drag     : %f m/s\n", stats->delta_v_drag);

@@ -41,17 +41,25 @@ double planetoid_rho(const Planetoid *self, Vector position) {
     return atm * 1.2230948554874 * 0.008; /* This came from the wiki */
 }
 
-Vector planetoid_position_radius_vector(const Planetoid *self, Vector position) {
+Vector planetoid_relative_position(const Planetoid *self, Vector position) {
     return vector_sub(position, self->position);
 }
 
 double planetoid_position_radius(const Planetoid *self, Vector position) {
-    return vector_mag( planetoid_position_radius_vector(self, position) );
+    return vector_mag( planetoid_relative_position(self, position) );
+}
+
+double planetoid_position_altitude(const Planetoid *self, Vector position) {
+    return planetoid_position_radius(self, position) - self->radius;
+}
+
+double planetoid_position_azm(const Planetoid *self, Vector position) {
+    return vector_azm( planetoid_relative_position(self, position) );
 }
 
 Vector planetoid_gravitational_force(const Planetoid *self, double mass, Vector position) {
     //Compute the relative position vector, r
-    Vector r_vec = planetoid_position_radius_vector(self, position);
+    Vector r_vec = planetoid_relative_position(self, position);
     double r = vector_mag(r_vec);
 
     //Compute the gravitational force magnitude. Note that it is negative because it goes opposite the position.

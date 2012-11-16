@@ -4,7 +4,7 @@
 
 #include "system.h"
 
-#define SYSTEM_TICKS_PER_SECOND 1000
+#define SYSTEM_TICKS_PER_SECOND 100
 #define LOG_INTERVAL_SECONDS 1
 
 System *system_alloc(void) {
@@ -75,10 +75,6 @@ void system_run_one_tick(System *self) {
     //Got tired of writing self->delta_t.
     double delta_t = self->delta_t;
 
-#ifdef DEBUG
-    printf("n: %lu, t: %f, dt: %f\n", self->ticks, system_time(self), delta_t);
-#endif
-
     //Set rocket according to program.
     system_set_throttle(self);
     system_set_altitude_angle(self);
@@ -109,10 +105,12 @@ void system_run_one_tick(System *self) {
     frame.delta_mass = dm;
     frame.delta_position = delta_r;
     frame.delta_velocity = delta_v;
+    frame.radius = planetoid_position_radius(self->planetoid, self->frame->position);
+    frame.altitude = planetoid_position_altitude(self->planetoid, self->frame->position);
+    frame.azimuth = planetoid_position_azm(self->planetoid, self->frame->position);
 
 #ifdef DEBUG
-    printf("dm: %f, dv: (%f, %f), dr: (%f, %f)\n", dm, dvx, dvy, dx, dy);
-    printf("m: %f, v: (%f, %f), r: (%f, %f)\n", m, VX(self->rocket->velocity), VY(self->rocket->velocity), VX(self->rocket->position), VY(self->rocket->position));
+    display_frame(self->frame);
 #endif
 
     // Now apply the changes.
@@ -152,10 +150,6 @@ Vector system_net_force(const System *self) {
 
     // Get thrust.
     Vector thrust = rocket_thrust_force(self->rocket, planetoid_atm(self->planetoid, self->rocket->position));
-
-#ifdef DEBUG
-    printf("gravity:(%f, %f); thrust:(%f, %f), air:(%f, %f)\n", VX(gravity), VY(gravity), VX(thrust), VY(thrust), VX(drag), VY(drag));
-#endif
 
     // Sum.
     double fx = VX(gravity) + VX(drag) + VX(thrust);
@@ -209,9 +203,9 @@ void system_update_stats(System *self) {
     self->stats.delta_v_drag += alpha * vector_mag(self->frame->force_drag);
     self->stats.delta_v_gravity += alpha * vector_mag(self->frame->force_gravity);
 
-    double radius = planetoid_position_radius(self->planetoid, self->frame->position);
-    if(radius > self->stats.max_radius) {
-        self->stats.max_radius = radius;
+    if(self->frame->radius > self->stats.max_radius) {
+        self->stats.max_radius = self->frame->radius;
+        self->stats.max_altitude = self->frame->altitude;
         self->stats.max_radius_time = self->frame->t;
     }
 }

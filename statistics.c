@@ -13,6 +13,7 @@ void statistics_dealloc(Statistics *stats) {
 Statistics *statistics_init(Statistics *stats) {
     stats->mission_time = 0.0;
     stats->max_radius = 0.0;
+    stats->max_altitude = 0.0;
     stats->max_radius_time = 0.0;
     stats->distance_travelled = 0.0;
 
