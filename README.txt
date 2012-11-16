@@ -46,6 +46,41 @@ with more complex logic at any time.
 
 The optimizer has yet to be constructed.
 
+TODO
+
+Refactors:
+1. Make a Frame struct that is statically created at the top of each tick and
+   placed by reference into the System.  We can populate its values during the
+   tick and then use it to both write the log and gather statistics.
+2. Simulation cutoff is complicated:
+   * To save on a lot of simulation time, if we are above the atmosphere and
+     have reached apoapsis, we can use the rocket equation to assume a delta-v
+     and, since we are at an apsis, calculate the resulting alt of hte other
+     apsis.  This will allow us to use semimajor-axis of an orbit as a fitness
+     function.
+   * Escape orbits can be detected if the energy >= 0.  How do we rate these
+     in our fitness function?
+   * Assuming we don't simulate burn at apex (which would give us time to fall),
+     we can cutoff the simulation when the radial velocity (relative to the
+     planetoid) is negative.  To be safer, we can do this when it is negative
+     and we are below theedge of the atmosphere, at which point we'd have
+     atmospheric decay and a possible--but not idael--orbit.
+   * Question: can we use the energy of the orbit as a fitness function, with
+     the energy for a circular orbit right at the atmospher cut-off as a worst
+     case for an orbit?
+   * NOTE: http://www.braeunig.us/space/orbmech.htm may help with this.
+
+To get full 2D support I need:
+1. Adjustment of system run end condition to be anytime we are descending below
+   the atmospheric cutoff.  At this condition, we'd not be in a stable orbit.
+   Note that this requires both calculation of the radial velocity *relative*
+   to the planetoid, and the using of the atmospheric cutoff radius.
+2. Calculate the aboslute angle of the program altitude-angle and put in thrust.
+3. Offer method for conversion of planetoid and position to polar vector components.
+3. Program Addition for a variable cutoff altitude at which we cut-off engines
+   and coast to near apoapsis altitude before burning.
+4. Take into account initial velocity from planetoid rotation.
+
 LICENSE
 
 Copyright (c) 2012, Jeffrey C. Reinecke

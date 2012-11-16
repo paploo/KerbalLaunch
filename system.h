@@ -7,6 +7,7 @@
 #include "program.h"
 #include "planetoid.h"
 #include "statistics.h"
+#include "frame.h"
 
 #define MAX_MISSION_TIME 900.0
 
@@ -18,18 +19,20 @@ typedef enum SystemState {
 } SystemState;
 
 typedef struct System {
+    Statistics stats;
+
     Rocket *rocket;
     Program *throttle_program;
     Program *altitude_angle_program;
     Planetoid *planetoid;
+
     double delta_t;
 
     unsigned long ticks;
     SystemState state;
+    Frame *frame;
 
     bool logging;
-
-    Statistics stats;
 } System;
 
 System *system_alloc(void);

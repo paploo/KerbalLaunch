@@ -16,6 +16,8 @@ void system_dealloc(System *self) {
 }
 
 System *system_init(System *self) {
+    statistics_init(&self->stats);
+
     self->rocket = NULL;
     self->planetoid = NULL;
     self->throttle_program = NULL;
@@ -25,10 +27,9 @@ System *system_init(System *self) {
 
     self->state = SYSTEM_STATE_READY;
     self->ticks = 0;
+    self->frame = NULL;
 
     self->logging = false;
-
-    statistics_init(&self->stats);
 
     return self;
 }
@@ -61,13 +62,20 @@ void system_run(System *self) {
 }
 
 void system_run_one_tick(System *self) {
+    //Allocate the frame on the stack and point to it.
+    Frame frame;
+    self->frame = &frame;
+
+    //Got tired of writing self->delta_t.
     double delta_t = self->delta_t;
+
 #ifdef DEBUG
     printf("n: %lu, t: %f, dt: %f\n", self->ticks, system_time(self), delta_t);
 #endif
 
-    //Set thrust according to program.
+    //Set rocket according to program.
     system_set_throttle(self);
+    system_set_altitude_angle(self);
 
     //Calcualte the mass and mass change.
     double m = self->rocket->mass;
@@ -84,6 +92,17 @@ void system_run_one_tick(System *self) {
     double dx = 0.5*a.v[0]*delta_t*delta_t + self->rocket->velocity.v[0]*delta_t;
     double dy = 0.5*a.v[1]*delta_t*delta_t + self->rocket->velocity.v[1]*delta_t;
     Vector delta_r = vector_rect(dx,dy);
+
+    //Set the frame.
+    frame.ticks = self->ticks;
+    frame.t = system_time(self);
+    frame.mass = m;
+    frame.position = self->rocket->position;
+    frame.velocity = self->rocket->velocity;
+    frame.delta_t = delta_t;
+    frame.delta_mass = dm;
+    frame.delta_position = delta_r;
+    frame.delta_velocity = delta_v;
 
 #ifdef DEBUG
     printf("dm: %f, dv: (%f, %f), dr: (%f, %f)\n", dm, dvx, dvy, dx, dy);
@@ -114,7 +133,7 @@ Vector system_net_force(const System *self) {
     Vector gravity = planetoid_gravitational_force(self->planetoid, self->rocket->mass, self->rocket->position);
 
     // Get air resistance.
-    Vector air_resistance = planetoid_atmospheric_drag(
+    Vector drag = planetoid_atmospheric_drag(
         self->planetoid,
         self->rocket->position,
         self->rocket->velocity,
@@ -126,12 +145,21 @@ Vector system_net_force(const System *self) {
     Vector thrust = rocket_thrust_force(self->rocket, planetoid_atm(self->planetoid, self->rocket->position));
 
 #ifdef DEBUG
-    printf("gravity:(%f, %f); thrust:(%f, %f), air:(%f, %f)\n", VX(gravity), VY(gravity), VX(thrust), VY(thrust), VX(air_resistance), VY(air_resistance));
+    printf("gravity:(%f, %f); thrust:(%f, %f), air:(%f, %f)\n", VX(gravity), VY(gravity), VX(thrust), VY(thrust), VX(drag), VY(drag));
 #endif
 
     // Sum.
-    double fx = VX(gravity) + VX(air_resistance) + VX(thrust);
-    double fy = VY(gravity) + VY(air_resistance) + VY(thrust);
+    double fx = VX(gravity) + VX(drag) + VX(thrust);
+    double fy = VY(gravity) + VY(drag) + VY(thrust);
+    Vector f = vector_rect(fx, fy);
+
+    // Put in frame.
+    self->frame->force = f;
+    self->frame->force_thrust = thrust;
+    self->frame->force_gravity = gravity;
+    self->frame->force_drag = drag;
+
+    // Return;;
     return vector_rect(fx, fy);
 }
 
@@ -188,6 +216,7 @@ void system_set_throttle(System *self) {
     assert(error==0);
 
     self->rocket->throttle = throttle;
+    self->frame->throttle = throttle;
 }
 
 void system_set_altitude_angle(System *self) {
@@ -198,4 +227,5 @@ void system_set_altitude_angle(System *self) {
     assert(error==0);
 
     self->rocket->altitude_angle = altitude_angle;
+    self->frame->altitude_angle = altitude_angle;
 }
