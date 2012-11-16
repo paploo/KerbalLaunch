@@ -22,15 +22,17 @@ typedef struct Rocket {
     double max_drag;
 } Rocket;
 
-
 Rocket *rocket_alloc(void);
 void rocket_dealloc(Rocket *self);
 Rocket *rocket_init(Rocket *self);
 
 double rocket_isp(const Rocket *self, double atm);
 double rocket_thrust(const Rocket *self, double atm);
-Vector rocket_thrust_force(const Rocket *self, double atm);
+Vector rocket_thrust_force(const Rocket *self, double atm, double azm);
 double rocket_mass_flow(const Rocket *self, double atm);
 double rocket_drag(const Rocket *self);
+
+double rocket_momentum(const Rocket *self);
+double rocket_kinetic_energy(const Rocket *self);
 
 #endif

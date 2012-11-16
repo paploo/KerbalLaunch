@@ -53,7 +53,7 @@ double planetoid_position_altitude(const Planetoid *self, Vector position) {
     return planetoid_position_radius(self, position) - self->radius;
 }
 
-double planetoid_position_azm(const Planetoid *self, Vector position) {
+double planetoid_position_azimuth(const Planetoid *self, Vector position) {
     return vector_azm( planetoid_relative_position(self, position) );
 }
 
@@ -107,4 +107,12 @@ Vector planetoid_irl_atmospheric_drag(const Planetoid *self, Vector position, Ve
 
     //Return the vector.
     return vector_polar(f_mag, f_azm);
+}
+
+double planetoid_potential_energy(const Planetoid *self, Vector position, double mass) {
+    return -(mass * self->gravitational_parameter) / planetoid_position_radius(self, position);
+}
+
+double angular_momentum(const Planetoid *self, Vector velocity, Vector position, double mass) {
+    return mass * vector_cross(velocity, position);
 }

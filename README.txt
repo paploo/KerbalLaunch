@@ -48,11 +48,8 @@ The optimizer has yet to be constructed.
 
 TODO
 
-Refactors:
-1. Make a Frame struct that is statically created at the top of each tick and
-   placed by reference into the System.  We can populate its values during the
-   tick and then use it to both write the log and gather statistics.
-2. Simulation cutoff is complicated:
+To get full 2D support I need:
+1. Simulation cutoff is complicated:
    * To save on a lot of simulation time, if we are above the atmosphere and
      have reached apoapsis, we can use the rocket equation to assume a delta-v
      and, since we are at an apsis, calculate the resulting alt of hte other
@@ -69,17 +66,9 @@ Refactors:
      the energy for a circular orbit right at the atmospher cut-off as a worst
      case for an orbit?
    * NOTE: http://www.braeunig.us/space/orbmech.htm may help with this.
-
-To get full 2D support I need:
-1. Adjustment of system run end condition to be anytime we are descending below
-   the atmospheric cutoff.  At this condition, we'd not be in a stable orbit.
-   Note that this requires both calculation of the radial velocity *relative*
-   to the planetoid, and the using of the atmospheric cutoff radius.
-2. Calculate the aboslute angle of the program altitude-angle and put in thrust.
-3. Offer method for conversion of planetoid and position to polar vector components.
-3. Program Addition for a variable cutoff altitude at which we cut-off engines
+2. Program Addition for a variable cutoff altitude at which we cut-off engines
    and coast to near apoapsis altitude before burning.
-4. Take into account initial velocity from planetoid rotation.
+3. Take into account initial velocity from planetoid rotation.
 
 LICENSE
 

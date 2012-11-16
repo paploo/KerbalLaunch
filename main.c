@@ -4,8 +4,6 @@
 
 #include "system.h"
 
-#define DEGREE 57.29577951308232
-
 void test();
 int simulate();
 Rocket *init_small_rocket(Rocket *rocket);

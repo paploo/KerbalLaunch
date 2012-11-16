@@ -47,18 +47,32 @@ double rocket_thrust(const Rocket *self, double atm) {
         return self->throttle * self->max_thrust;
 }
 
-Vector rocket_thrust_force(const Rocket *self, double atm) {
+Vector rocket_thrust_force(const Rocket *self, double atm, double azm) {
     //Calculate thrust force.
     double f_mag = rocket_thrust(self, atm);
 
-    //TODO: calculate thrust based off of altitude_angle relative to position to planetoid!
-    double f_azm = self->altitude_angle;
+    //The azm is the azimuth angle of the vector from the center of the planetoid to the rocket.
+    //The zenith angle is angle of the ship relative to the zenith angle.
+    //The altitude angle is the complement of the zenith angle.
+    //To match KSP intuition, we thus define altitude_angle such that:
+    //  0.0 degrees points in the positive-x direction of the local horizon frame.
+    // 90.0 degrees points straight-up.
+    double f_azm = azm - M_PI/2.0 + self->altitude_angle;
 
     // Return.
     return vector_polar(f_mag, f_azm);
 }
 
 double rocket_drag(const Rocket *self) {
-    //TODO: Change so that we smoothly change from the frontal area to the side_area depending on velocity vector angle.
+    //NOTE: In the future this should be different for the side, but KSP 0.17 doesn't seem to care.
     return self->max_drag;
+}
+
+double rocket_momentum(const Rocket *self) {
+    return self->mass * vector_mag(self->velocity);
+}
+
+double rocket_kinetic_energy(const Rocket *self) {
+    double v = vector_mag(self->velocity);
+    return 0.5 * self->mass * v * v;
 }

@@ -37,6 +37,10 @@ double vector_inner(Vector v, Vector u) {
     return sum;
 }
 
+double vector_cross(Vector v, Vector u) {
+    return v.v[0]*u.v[1] -  v.v[1]*u.v[0];
+}
+
 Vector vector_add(Vector v, Vector u) {
     Vector w;
     for(size_t i=0; i<VECTOR_DIMS; i++)

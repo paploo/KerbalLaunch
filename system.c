@@ -4,9 +4,6 @@
 
 #include "system.h"
 
-#define SYSTEM_TICKS_PER_SECOND 100
-#define LOG_INTERVAL_SECONDS 1
-
 System *system_alloc(void) {
     return (System *)malloc(sizeof(System));
 }
@@ -107,7 +104,7 @@ void system_run_one_tick(System *self) {
     frame.delta_velocity = delta_v;
     frame.radius = planetoid_position_radius(self->planetoid, self->frame->position);
     frame.altitude = planetoid_position_altitude(self->planetoid, self->frame->position);
-    frame.azimuth = planetoid_position_azm(self->planetoid, self->frame->position);
+    frame.azimuth = planetoid_position_azimuth(self->planetoid, self->frame->position);
 
 #ifdef DEBUG
     display_frame(self->frame);
@@ -137,7 +134,11 @@ double system_time(const System *self) {
 
 Vector system_net_force(const System *self) {
     // Get gravity.
-    Vector gravity = planetoid_gravitational_force(self->planetoid, self->rocket->mass, self->rocket->position);
+    Vector gravity = planetoid_gravitational_force(
+        self->planetoid,
+        self->rocket->mass,
+        self->rocket->position
+    );
 
     // Get air resistance.
     Vector drag = planetoid_atmospheric_drag(
@@ -149,7 +150,11 @@ Vector system_net_force(const System *self) {
     );
 
     // Get thrust.
-    Vector thrust = rocket_thrust_force(self->rocket, planetoid_atm(self->planetoid, self->rocket->position));
+    Vector thrust = rocket_thrust_force(
+        self->rocket,
+        planetoid_atm(self->planetoid, self->rocket->position),
+        planetoid_position_azimuth(self->planetoid, self->rocket->position)
+    );
 
     // Sum.
     double fx = VX(gravity) + VX(drag) + VX(thrust);
@@ -226,9 +231,9 @@ void system_log_tick(const System *self) {
             VY(self->frame->position),
             VX(self->frame->velocity),
             VY(self->frame->velocity),
-            planetoid_position_radius(self->planetoid, self->frame->position),
-            planetoid_position_radius(self->planetoid, self->frame->position) - self->planetoid->radius,
-            -1.0,
+            self->frame->radius,
+            self->frame->altitude,
+            self->frame->azimuth,
             VX(self->frame->force),
             VY(self->frame->force),
             self->frame->throttle,
