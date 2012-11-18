@@ -9,9 +9,9 @@
 #include "statistics.h"
 #include "frame.h"
 
-#define MAX_MISSION_TIME 900.0
 #define SYSTEM_TICKS_PER_SECOND 100
-#define LOG_INTERVAL_SECONDS 1
+#define SYSTEM_LOG_INTERVAL_SECONDS 1
+#define SYSTEM_MAX_MISSION_TIME 900.0
 
 typedef enum SystemState {
     SYSTEM_STATE_READY=0,

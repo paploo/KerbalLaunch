@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 
 #include "system.h"
 
@@ -10,7 +11,12 @@ Rocket *init_small_rocket(Rocket *rocket);
 Rocket *init_large_rocket(Rocket *rocket);
 
 int main(){
-    return simulate_vert();
+    clock_t start = clock();
+    int result = simulate_vert();
+    clock_t stop = clock();
+    clock_t delta_t = stop-start;
+    printf("TIME: %f ms\n", ((double)delta_t)/CLOCKS_PER_SEC);
+    return result;
 }
 
 int simulate_vert() {

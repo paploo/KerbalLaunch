@@ -50,7 +50,7 @@ void system_run(System *self) {
 
     //We have the radial velocity cutoff a little below 0.0, because high tick rates with float precision can cause this to abort early.
     while( altitude >= 0.0 && radial_velocity >= -1.0 ) {
-        if( system_time(self) > MAX_MISSION_TIME ) {
+        if( system_time(self) > SYSTEM_MAX_MISSION_TIME ) {
             self->state = SYSTEM_STATE_ERROR;
             break;
         }
@@ -247,7 +247,7 @@ void system_log_tick(const System *self) {
         return;
 
     //TODO: Log to a CSV file; header row should be written when run starts.
-    if( (self->ticks % (LOG_INTERVAL_SECONDS*SYSTEM_TICKS_PER_SECOND)) == 0 )
+    if( (self->ticks % (SYSTEM_LOG_INTERVAL_SECONDS*SYSTEM_TICKS_PER_SECOND)) == 0 )
         fprintf(
             self->log,
             "%lu, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
