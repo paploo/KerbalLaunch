@@ -28,7 +28,7 @@ Vector planetoid_gravitational_force(const Planetoid *self, double mass, Vector 
 Vector planetoid_atmospheric_drag(const Planetoid *self, Vector position, Vector velocity, double max_drag, double mass);
 Vector planetoid_irl_atmospheric_drag(const Planetoid *self, Vector position, Vector speed, double frontal_area, double coeff);
 
-double planetoid_potential_energy(const Planetoid *self, Vector position, double mass);
-double angular_momentum(const Planetoid *self, Vector velocity, Vector position, double mass);
+double planetoid_potential_energy(const Planetoid *self, Vector position);
+double planetoid_angular_momentum(const Planetoid *self, Vector velocity, Vector position);
 
 #endif

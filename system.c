@@ -107,25 +107,23 @@ void system_run_one_tick(System *self) {
     frame.azimuth = planetoid_position_azimuth(self->planetoid, self->frame->position);
 
 #ifdef DEBUG
-    display_frame(self->frame);
+    frame_display(self->frame);
 #endif
 
-    // Now apply the changes.
+    //Then record the rame statistics.
+    system_update_stats(self);
+    system_log_tick(self);
+
+    // Now apply the changes just before cleanup.
     self->rocket->mass -= dm;
     self->rocket->velocity.v[0] += dvx;
     self->rocket->velocity.v[1] += dvy;
     self->rocket->position.v[0] += dx;
     self->rocket->position.v[1] += dy;
-
-    //Then record the statistics.
-    system_update_stats(self);
-    system_log_tick(self);
+    self->ticks++;
 
     //Cleanup
     self->frame = NULL;
-
-    //Increment time.
-    self->ticks++;
 }
 
 double system_time(const System *self) {
@@ -193,6 +191,22 @@ void system_set_altitude_angle(System *self) {
     self->frame->altitude_angle = altitude_angle;
 }
 
+bool system_apses(const System *self, double *periapsis, double *apoapsis) {
+    double angular_momentum = system_angular_momentum(self);
+    double energy =  system_energy(self);
+    double gravitational_parameter = self->planetoid->gravitational_parameter;
+
+    return orbit_apses(gravitational_parameter, angular_momentum, energy, periapsis, apoapsis);
+}
+
+double system_energy(const System *self) {
+    return rocket_kinetic_energy(self->rocket) + planetoid_potential_energy(self->planetoid, self->rocket->position);
+}
+
+double system_angular_momentum(const System *self) {
+    return planetoid_angular_momentum(self->planetoid, self->rocket->velocity, self->rocket->position);
+}
+
 void system_log_header(const System *self) {
     if(!self->logging)
         return;
@@ -208,10 +222,21 @@ void system_update_stats(System *self) {
     self->stats.delta_v_drag += alpha * vector_mag(self->frame->force_drag);
     self->stats.delta_v_gravity += alpha * vector_mag(self->frame->force_gravity);
 
+    double periapsis = 0.0;
+    double apoapsis = 0.0;
+
     if(self->frame->radius > self->stats.max_radius) {
         self->stats.max_radius = self->frame->radius;
         self->stats.max_altitude = self->frame->altitude;
         self->stats.max_radius_time = self->frame->t;
+        self->stats.max_radius_position = self->frame->position;
+        self->stats.max_radius_velocity = self->frame->velocity;
+        self->stats.max_radius_energy = system_energy(self);
+        self->stats.max_radius_angular_momentum = system_angular_momentum(self);
+        if( system_apses(self, &periapsis, &apoapsis) ) {
+            self->stats.max_radius_apoapsis = apoapsis;
+            self->stats.max_radius_periapsis = periapsis;
+        }
     }
 }
 
@@ -239,4 +264,29 @@ void system_log_tick(const System *self) {
             self->frame->throttle,
             self->frame->altitude_angle
         );
+}
+
+bool orbit_apses(double gravitational_parameter, double angular_momentum, double energy, double *periapsis, double *apoapsis) {
+    if(energy >= 0.0)
+        return false;
+
+    double eccentricity = orbit_eccentricity(gravitational_parameter, angular_momentum, energy);
+    double semimajor_axis = -(gravitational_parameter)/(2.0*energy);
+
+    *periapsis = semimajor_axis * (1.0 - eccentricity);
+    *apoapsis = semimajor_axis * (1.0 + eccentricity);
+
+    return true;
+}
+
+double orbit_eccentricity(double gravitational_parameter, double angular_momentum, double energy) {
+    double numerator = 2.0 * angular_momentum * angular_momentum * energy;
+    double denominator = gravitational_parameter * gravitational_parameter;
+
+    double radicand = 1.0 + numerator/denominator;
+    // Sometimes rounding errors on near circular orbits make the radicand negative when it should be near zero.
+    if(radicand < 0.0)
+        radicand = 0.0;
+
+    return sqrt(radicand);
 }

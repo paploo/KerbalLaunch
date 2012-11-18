@@ -74,5 +74,5 @@ double rocket_momentum(const Rocket *self) {
 
 double rocket_kinetic_energy(const Rocket *self) {
     double v = vector_mag(self->velocity);
-    return 0.5 * self->mass * v * v;
+    return 0.5 * v * v;
 }

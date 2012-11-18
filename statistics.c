@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "statistics.h"
 
@@ -11,15 +12,6 @@ void statistics_dealloc(Statistics *stats) {
 }
 
 Statistics *statistics_init(Statistics *stats) {
-    stats->mission_time = 0.0;
-    stats->max_radius = 0.0;
-    stats->max_altitude = 0.0;
-    stats->max_radius_time = 0.0;
-    stats->distance_travelled = 0.0;
-
-    stats->delta_v_thrust = 0.0;
-    stats->delta_v_drag = 0.0;
-    stats->delta_v_gravity = 0.0;
-
+    memset(stats, 0, sizeof(Statistics));
     return stats;
 }

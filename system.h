@@ -9,8 +9,8 @@
 #include "statistics.h"
 #include "frame.h"
 
-#define MAX_MISSION_TIME 900.0
-#define SYSTEM_TICKS_PER_SECOND 200000
+#define MAX_MISSION_TIME 4000.0
+#define SYSTEM_TICKS_PER_SECOND 100 //200000
 #define LOG_INTERVAL_SECONDS 1
 
 typedef enum SystemState {
@@ -49,8 +49,21 @@ double system_time(const System *self);
 Vector system_net_force(const System *self);
 void system_set_throttle(System *self);
 void system_set_altitude_angle(System *self);
+
+bool system_apses(const System *self, double *periapsis, double *apoapsis);
+double system_energy(const System *self);
+double system_angular_momentum(const System *self);
+
 void system_update_stats(System *self);
 void system_log_header(const System *self);
 void system_log_tick(const System *self);
+
+/*
+ * Given an angular momentum and an energy, Calculate the periapsis and apopais radius.
+ * The return is true if the orbit is closed; the result is placed in the passed pointers.
+ * If the orbit is open, false is passed and the values of periapsis abd apoapsis are not defined.
+ */
+bool orbit_apses(double graviational_parameter, double angluar_momentum, double energy, double *periapsis, double *apoapsis);
+double orbit_eccentricity(double graviational_parameter, double angular_momentum, double energy);
 
 #endif

@@ -5,15 +5,15 @@
 #include "system.h"
 
 void test();
-int simulate();
+int simulate_vert();
 Rocket *init_small_rocket(Rocket *rocket);
 Rocket *init_large_rocket(Rocket *rocket);
 
 int main(){
-    return simulate();
+    return simulate_vert();
 }
 
-int simulate() {
+int simulate_vert() {
     //Build the planetoid
     Planetoid *kerbin = planetoid_init(planetoid_alloc());
 
@@ -30,6 +30,15 @@ int simulate() {
     altitude_angle_program->altitudes[0] = -600000.0;
     altitude_angle_program->settings[0] = M_PI/2.0;
 
+    //Override settings to test a circular orbit
+    /*
+    rocket->position.v[0] = 0.0;
+    rocket->position.v[1] = 675000.0;
+    rocket->velocity.v[0] = sqrt(5232000.0);
+    rocket->velocity.v[1] = 0.0;
+    throttle_program->settings[0] = 0.0;
+    */
+
 
     //Build the system
     System *system = system_init(system_alloc());
@@ -41,8 +50,10 @@ int simulate() {
 
     //Run
     system_run(system);
-    //system_log_header(system);
-    //system_run_one_tick(system);
+    /*
+    system_log_header(system);
+    system_run_one_tick(system);
+    */
 
     //Output stats
     printf("state     : %d\n", system->state);
@@ -50,7 +61,11 @@ int simulate() {
 
     Statistics *stats = &system->stats;
     printf("time      : %f s\n", stats->mission_time);
-    printf("max_alt: %f m @ %f sec\n", stats->max_altitude, stats->max_radius_time);
+    printf("max_alt   : %f m @ %f sec\n", stats->max_altitude, stats->max_radius_time);
+    printf("max_pos   : (%f, %f)\n", VX(stats->max_radius_position), VY(stats->max_radius_position));
+    printf("max_vel   : (%f, %f)\n", VX(stats->max_radius_velocity), VY(stats->max_radius_velocity));
+    printf("max r e,h : %f, %f\n", stats->max_radius_energy, stats->max_radius_angular_momentum);
+    printf("max ra, rp: %f, %f\n", stats->max_radius_apoapsis, stats->max_radius_periapsis);
     printf("distance  : %f m\n", stats->distance_travelled);
     printf("delta_v_thrust   : %f m/s\n", stats->delta_v_thrust);
     printf("delta_v_drag     : %f m/s\n", stats->delta_v_drag);

@@ -3,5 +3,7 @@ kerbal_launch.debug
 *.o
 *.plist
 
+*.csv
+
 *.swp
 *.swo
