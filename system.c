@@ -48,7 +48,8 @@ void system_run(System *self) {
     double altitude = planetoid_position_altitude(self->planetoid, self->rocket->position);
     double radial_velocity = planetoid_radial_velocity(self->planetoid, self->rocket->position, self->rocket->velocity);
 
-    while( altitude >= 0.0 && radial_velocity >= 0.0 ) {
+    //We have the radial velocity cutoff a little below 0.0, because high tick rates with float precision can cause this to abort early.
+    while( altitude >= 0.0 && radial_velocity >= -1.0 ) {
         if( system_time(self) > MAX_MISSION_TIME ) {
             self->state = SYSTEM_STATE_ERROR;
             break;

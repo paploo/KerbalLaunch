@@ -17,8 +17,8 @@ Vector vector_rect(double x, double y) {
 
 Vector vector_polar(double mag, double azm) {
     Vector v;
-    v.v[0] = mag * cos(azm);
-    v.v[1] = mag * sin(azm);
+    v.v[0] = mag * kerbal_cos(azm);
+    v.v[1] = mag * kerbal_sin(azm);
     return v;
 }
 
@@ -27,12 +27,12 @@ double vector_mag(Vector v) {
 }
 
 double vector_azm(Vector v) {
-    return atan2(v.v[1], v.v[0]);
+    return kerbal_atan2(v.v[1], v.v[0]);
 }
 
 Vector vector_rotate(Vector v, double theta) {
-    double xprime = VX(v)*cos(theta) - VY(v)*sin(theta);
-    double yprime = VX(v)*sin(theta) + VY(v)*cos(theta);
+    double xprime = VX(v)*kerbal_cos(theta) - VY(v)*kerbal_sin(theta);
+    double yprime = VX(v)*kerbal_sin(theta) + VY(v)*kerbal_cos(theta);
     return vector_rect(xprime, yprime);
 }
 

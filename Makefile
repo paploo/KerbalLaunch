@@ -1,6 +1,6 @@
 # Setup compile environment.
 CC = clang
-CFLAGS = -Wall -pedantic -std=c99
+CFLAGS = -Wall -pedantic -std=c99 -DKERBAL_LAUNCH_FLOAT_TRIG
 
 RELEASE_CFLAGS = -O3
 DEBUG_CFLAGS = -DDEBUG -O0 -g

@@ -10,6 +10,16 @@
 #define VX(vec) (vec.v[0])
 #define VY(vec) (vec.v[1])
 
+#ifdef KERBAL_LAUNCH_FLOAT_TRIG
+#define kerbal_atan2(y,x) (atan2f((y),(x)))
+#define kerbal_sin(theta) (sinf(theta))
+#define kerbal_cos(theta) (cosf(theta))
+#else
+#define kerbal_atan2(y,x) (atan2((y),(x)))
+#define kerbal_sin(theta) (sin(theta))
+#define kerbal_cos(theta) (cos(theta))
+#endif
+
 /*
 One might think these are faster because it acts inline, but this one change
 increases a rocket launch simulation time by about 10% in my benchmarks!

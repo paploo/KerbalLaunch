@@ -47,7 +47,7 @@ int simulate_vert() {
     system->rocket = rocket;
     system->throttle_program = throttle_program;
     system->altitude_angle_program = altitude_angle_program;
-    system->logging = true;
+    system->logging = false;
 
     //Open the log
     if(system->logging) {
