@@ -24,6 +24,11 @@ double planetoid_position_altitude(const Planetoid *self, Vector position);
 double planetoid_position_radius(const Planetoid *self, Vector position);
 double planetoid_position_azimuth(const Planetoid *self, Vector position);
 
+Vector planetoid_surface_frame_transform(const Planetoid *self, Vector position, Vector v);
+double planetoid_radial_velocity(const Planetoid *self, Vector position, Vector velocity);
+double planetoid_azimuthal_velocity(const Planetoid *self, Vector position, Vector velocity);
+double planetoid_horizontal_velocity(const Planetoid *self, Vector position, Vector velocity);
+
 Vector planetoid_gravitational_force(const Planetoid *self, double mass, Vector position);
 Vector planetoid_atmospheric_drag(const Planetoid *self, Vector position, Vector velocity, double max_drag, double mass);
 Vector planetoid_irl_atmospheric_drag(const Planetoid *self, Vector position, Vector speed, double frontal_area, double coeff);

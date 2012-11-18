@@ -57,6 +57,29 @@ double planetoid_position_azimuth(const Planetoid *self, Vector position) {
     return vector_azm( planetoid_relative_position(self, position) );
 }
 
+Vector planetoid_surface_frame_transform(const Planetoid *self, Vector position, Vector v) {
+    //Rotation is negative of the azm.
+    double theta = -(planetoid_position_azimuth(self, position));
+    return vector_rotate(v, theta);
+}
+
+double planetoid_radial_velocity(const Planetoid *self, Vector position, Vector velocity) {
+    //Since we translated the vertical to the x-axis.
+    return VX(planetoid_surface_frame_transform(self, position, velocity));
+}
+
+double planetoid_azimuthal_velocity(const Planetoid *self, Vector position, Vector velocity) {
+    //Since we translated the vertical to the x-axis, the y-axis is the azimuth.
+    //Note that this has the polar coordinate velocity sign.
+    return VY(planetoid_surface_frame_transform(self, position, velocity));
+}
+
+double planetoid_horizontal_velocity(const Planetoid *self, Vector position, Vector velocity) {
+    //Since we translated the vertical to the x-axis, the y-axis is the azimuth.
+    //Note that since the positive "x" direction is in the -y direction now, like it were a local rect coord frame.
+    return -VY(planetoid_surface_frame_transform(self, position, velocity));
+}
+
 Vector planetoid_gravitational_force(const Planetoid *self, double mass, Vector position) {
     //Compute the relative position vector, r
     Vector r_vec = planetoid_relative_position(self, position);

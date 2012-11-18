@@ -45,8 +45,8 @@ void system_run(System *self) {
     //Run
     assert(self->state == SYSTEM_STATE_READY);
     self->state = SYSTEM_STATE_RUNNING;
-    double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
-    double radial_velocity = self->rocket->velocity.v[0]; //TODO: This needs to calculate the radial velocity in relation to the planet, not the y velocity!
+    double altitude = planetoid_position_altitude(self->planetoid, self->rocket->position);
+    double radial_velocity = planetoid_radial_velocity(self->planetoid, self->rocket->position, self->rocket->velocity);
 
     while( altitude >= 0.0 && radial_velocity >= 0.0 ) {
         if( system_time(self) > MAX_MISSION_TIME ) {
@@ -54,8 +54,8 @@ void system_run(System *self) {
             break;
         }
         system_run_one_tick(self);
-        altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
-        radial_velocity = self->rocket->velocity.v[0];
+        altitude = planetoid_position_altitude(self->planetoid, self->rocket->position);
+        radial_velocity = planetoid_radial_velocity(self->planetoid, self->rocket->position, self->rocket->velocity);
     }
 
     if(self->state >= 0)

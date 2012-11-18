@@ -30,6 +30,12 @@ double vector_azm(Vector v) {
     return atan2(v.v[1], v.v[0]);
 }
 
+Vector vector_rotate(Vector v, double theta) {
+    double xprime = VX(v)*cos(theta) - VY(v)*sin(theta);
+    double yprime = VX(v)*sin(theta) + VY(v)*cos(theta);
+    return vector_rect(xprime, yprime);
+}
+
 double vector_inner(Vector v, Vector u) {
     double sum = 0.0;
     for(size_t i=0; i<VECTOR_DIMS; i++)

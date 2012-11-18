@@ -28,6 +28,8 @@ Vector vector_polar(double mag, double azm);
 double vector_mag(Vector v);
 double vector_azm(Vector v);
 
+Vector vector_rotate(Vector v, double theta);
+
 double vector_inner(Vector v, Vector u);
 /* mag(v x u) = z-component of v x u. */
 double vector_cross(Vector v, Vector u);

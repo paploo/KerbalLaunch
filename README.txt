@@ -49,26 +49,23 @@ The optimizer has yet to be constructed.
 TODO
 
 To get full 2D support I need:
-1. Simulation cutoff is complicated:
-   * To save on a lot of simulation time, if we are above the atmosphere and
-     have reached apoapsis, we can use the rocket equation to assume a delta-v
-     and, since we are at an apsis, calculate the resulting alt of hte other
-     apsis.  This will allow us to use semimajor-axis of an orbit as a fitness
-     function.
-   * Escape orbits can be detected if the energy >= 0.  How do we rate these
-     in our fitness function?
-   * Assuming we don't simulate burn at apex (which would give us time to fall),
-     we can cutoff the simulation when the radial velocity (relative to the
-     planetoid) is negative.  To be safer, we can do this when it is negative
-     and we are below theedge of the atmosphere, at which point we'd have
-     atmospheric decay and a possible--but not idael--orbit.
-   * Question: can we use the energy of the orbit as a fitness function, with
-     the energy for a circular orbit right at the atmospher cut-off as a worst
-     case for an orbit?
-   * NOTE: http://www.braeunig.us/space/orbmech.htm may help with this.
-2. Program Addition for a variable cutoff altitude at which we cut-off engines
-   and coast to near apoapsis altitude before burning.
-3. Take into account initial velocity from planetoid rotation.
+[ ]Simulation cutoff:
+    [ ] To save on a lot of simulation time, if we are above the atmosphere and
+        have reached apoapsis, we can use the rocket equation to assume a delta-v
+        and, since we are at an apsis, calculate the resulting alt of hte other
+        apsis.  This will allow us to use semimajor-axis of an orbit as a fitness
+        function.
+    [ ] Escape orbits can be detected if the energy >= 0.
+    [+] Assuming we don't simulate burn at apex (which would give us time to fall),
+        we can cutoff the simulation when the radial velocity (relative to the
+        planetoid) is negative.  To be safer, we can do this when it is negative
+        and we are below theedge of the atmosphere, at which point we'd have
+        atmospheric decay and a possible--but not idael--orbit.
+      * NOTE: http://www.braeunig.us/space/orbmech.htm may help with this.
+[ ] Program Addition for a variable cutoff altitude at which we cut-off engines
+    and coast to near apoapsis altitude before burning.
+[+] Take into account initial velocity from planetoid rotation.
+[ ] What is a good fitness function?
 
 LICENSE
 

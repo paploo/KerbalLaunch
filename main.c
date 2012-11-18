@@ -20,6 +20,7 @@ int simulate_vert() {
     //Build the rocket
     Rocket *rocket = init_small_rocket(rocket_alloc());
     rocket->position.v[1] = kerbin->radius + 72.0; // Small rocket sits at 72.0m on pad.
+    rocket->velocity.v[0] = kerbin->radius * 0.0002908882086657216; // Surface rotational velocity.
 
     //Build the programs
     Program *throttle_program = program_init(program_alloc(), 1);
