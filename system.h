@@ -9,7 +9,7 @@
 #include "statistics.h"
 #include "frame.h"
 
-#define MAX_MISSION_TIME 4000.0
+#define MAX_MISSION_TIME 2000.0
 #define SYSTEM_TICKS_PER_SECOND 100 //200000
 #define LOG_INTERVAL_SECONDS 1
 
@@ -35,6 +35,7 @@ typedef struct System {
     Frame *frame;
 
     bool logging;
+    FILE *log;
 } System;
 
 System *system_alloc(void);

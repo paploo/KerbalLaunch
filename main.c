@@ -46,7 +46,12 @@ int simulate_vert() {
     system->rocket = rocket;
     system->throttle_program = throttle_program;
     system->altitude_angle_program = altitude_angle_program;
-    system->logging = false;
+    system->logging = true;
+
+    //Open the log
+    if(system->logging) {
+        system->log = fopen("_rocket.csv", "w+");
+    }
 
     //Run
     system_run(system);
@@ -54,6 +59,12 @@ int simulate_vert() {
     system_log_header(system);
     system_run_one_tick(system);
     */
+
+    //Close the log
+    if(system->logging) {
+        fclose(system->log);
+        system->log = stdout;
+    }
 
     //Output stats
     printf("state     : %d\n", system->state);

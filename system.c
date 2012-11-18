@@ -27,6 +27,7 @@ System *system_init(System *self) {
     self->frame = NULL;
 
     self->logging = false;
+    self->log = stdout;
 
     return self;
 }
@@ -207,13 +208,6 @@ double system_angular_momentum(const System *self) {
     return planetoid_angular_momentum(self->planetoid, self->rocket->velocity, self->rocket->position);
 }
 
-void system_log_header(const System *self) {
-    if(!self->logging)
-        return;
-
-    printf("tick, time, m, dm, x, y, vx, vy, r, alt, azm, fx, fy, throttle, altitude_angle\n");
-}
-
 void system_update_stats(System *self) {
     self->stats.distance_travelled += vector_mag(self->frame->delta_position);
 
@@ -240,13 +234,21 @@ void system_update_stats(System *self) {
     }
 }
 
+void system_log_header(const System *self) {
+    if(!self->logging)
+        return;
+
+    fprintf(self->log, "tick, time, m, dm, x, y, vx, vy, r, alt, azm, fx, fy, throttle, altitude_angle\n");
+}
+
 void system_log_tick(const System *self) {
     if(!self->logging)
         return;
 
     //TODO: Log to a CSV file; header row should be written when run starts.
     if( (self->ticks % (LOG_INTERVAL_SECONDS*SYSTEM_TICKS_PER_SECOND)) == 0 )
-        printf(
+        fprintf(
+            self->log,
             "%lu, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
             self->frame->ticks,
             self->frame->t,
