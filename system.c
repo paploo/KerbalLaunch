@@ -17,8 +17,10 @@ System *system_init(System *self) {
 
     self->rocket = NULL;
     self->planetoid = NULL;
+
     self->throttle_program = NULL;
     self->altitude_angle_program = NULL;
+    self->throttle_cutoff_radius = -1.0;
 
     self->delta_t = 1.0/SYSTEM_TICKS_PER_SECOND;
 
@@ -51,7 +53,7 @@ void system_run(System *self) {
     double radial_velocity = planetoid_radial_velocity(self->planetoid, self->rocket->position, self->rocket->velocity);
 
     //We have the radial velocity cutoff a little below 0.0, because high tick rates with float precision can cause this to abort early.
-    while( altitude >= 0.0 && radial_velocity >= -1.0 ) {
+    while( altitude >= 0.0 && radial_velocity >= -0.001 ) {
         if( system_time(self) > SYSTEM_MAX_MISSION_TIME ) {
             self->state = SYSTEM_STATE_ERROR;
             break;
@@ -174,12 +176,25 @@ Vector system_net_force(const System *self) {
 }
 
 void system_set_throttle(System *self) {
-    double altitude = planetoid_position_radius(self->planetoid, self->rocket->position) - self->planetoid->radius;
+    double throttle;
 
-    int error=0;
-    double throttle = program_lookup(self->throttle_program, altitude, &error);
-    assert(error==0);
+    // If a throttle cutoff is set, consider if the current apoapsis is at or above that altitude.
+    double periapsis, apoapsis;
+    bool closed = false;
+    bool consider_cutoff = self->throttle_cutoff_radius > 0.0;
+    if( consider_cutoff )
+        closed = system_apses(self, &periapsis, &apoapsis);
 
+    if(consider_cutoff && (!closed || (apoapsis >= self->throttle_cutoff_radius))) {
+        throttle = 0.0;
+    } else {
+        double altitude = planetoid_position_altitude(self->planetoid, self->rocket->position);
+        int error=0;
+        throttle = program_lookup(self->throttle_program, altitude, &error);
+        assert(error==0);
+    }
+
+    // Set
     self->rocket->throttle = throttle;
     self->frame->throttle = throttle;
 }

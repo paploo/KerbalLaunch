@@ -21,12 +21,14 @@ typedef enum SystemState {
 } SystemState;
 
 typedef struct System {
-    Statistics stats;
+    Statistics stats; //The stats object is a static member of the system; the system itself can be thought of as a stats object.
 
     Rocket *rocket;
+    Planetoid *planetoid;
+
     Program *throttle_program;
     Program *altitude_angle_program;
-    Planetoid *planetoid;
+    double throttle_cutoff_radius; //If the calculated apoapsis is above this value, cutoff the throttle.
 
     double delta_t;
 
@@ -34,10 +36,10 @@ typedef struct System {
     SystemState state;
     Frame *frame;
 
-    bool collect_stats;
+    bool collect_stats; //If true, collect stats.  This slows down simulation rate.
 
     bool logging;
-    FILE *log;
+    FILE *log; //Set this to a file pointer when you want to log to something other than the default (stdout).
 } System;
 
 System *system_alloc(void);
