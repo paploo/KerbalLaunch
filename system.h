@@ -34,6 +34,8 @@ typedef struct System {
     SystemState state;
     Frame *frame;
 
+    bool collect_stats;
+
     bool logging;
     FILE *log;
 } System;

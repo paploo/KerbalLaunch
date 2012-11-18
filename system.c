@@ -26,6 +26,8 @@ System *system_init(System *self) {
     self->ticks = 0;
     self->frame = NULL;
 
+    self->collect_stats = false;
+
     self->logging = false;
     self->log = stdout;
 
@@ -38,12 +40,12 @@ void system_run(System *self) {
     assert(self->planetoid);
     assert(self->throttle_program);
     assert(self->altitude_angle_program);
+    assert(self->state == SYSTEM_STATE_READY);
 
     //Setup
     system_log_header(self);
 
     //Run
-    assert(self->state == SYSTEM_STATE_READY);
     self->state = SYSTEM_STATE_RUNNING;
     double altitude = planetoid_position_altitude(self->planetoid, self->rocket->position);
     double radial_velocity = planetoid_radial_velocity(self->planetoid, self->rocket->position, self->rocket->velocity);
@@ -210,12 +212,11 @@ double system_angular_momentum(const System *self) {
 }
 
 void system_update_stats(System *self) {
+    if(!self->collect_stats)
+        return;
+
     self->stats.distance_travelled += vector_mag(self->frame->delta_position);
 
-    double alpha = self->frame->delta_t / self->frame->mass;
-    self->stats.delta_v_thrust += alpha * vector_mag(self->frame->force_thrust);
-    self->stats.delta_v_drag += alpha * vector_mag(self->frame->force_drag);
-    self->stats.delta_v_gravity += alpha * vector_mag(self->frame->force_gravity);
 
     double periapsis = 0.0;
     double apoapsis = 0.0;
@@ -232,6 +233,16 @@ void system_update_stats(System *self) {
             self->stats.max_radius_apoapsis = apoapsis;
             self->stats.max_radius_periapsis = periapsis;
         }
+
+        double alpha = self->frame->delta_t / self->rocket->mass;
+        self->stats.delta_v_thrust += alpha * vector_mag(self->frame->force_thrust);
+        self->stats.delta_v_drag += alpha * vector_mag(self->frame->force_drag);
+        self->stats.delta_v_gravity += alpha * vector_mag(self->frame->force_gravity);
+
+        double dr = vector_mag(self->frame->delta_position);
+        self->stats.work_thrust += dr * vector_mag(self->frame->force_thrust);
+        self->stats.work_drag += dr * vector_mag(self->frame->force_drag);
+        self->stats.work_gravity += dr * vector_mag(self->frame->force_gravity);
     }
 }
 
