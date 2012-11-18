@@ -76,3 +76,7 @@ double rocket_kinetic_energy(const Rocket *self) {
     double v = vector_mag(self->velocity);
     return 0.5 * v * v;
 }
+
+double rocket_ideal_delta_v(const Rocket *self) {
+    return rocket_isp(self, 0.0) * ISP_SURFACE_GRAVITY * log(self->mass / self->empty_mass);
+}

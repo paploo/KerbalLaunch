@@ -35,4 +35,8 @@ double rocket_drag(const Rocket *self);
 double rocket_momentum(const Rocket *self);
 double rocket_kinetic_energy(const Rocket *self);
 
+// At the current fuel level, in a vacuum, returns the delta_v that this rocket
+// could produce according to the Tsiolkovsky rocket equation.
+double rocket_ideal_delta_v(const Rocket *self);
+
 #endif
