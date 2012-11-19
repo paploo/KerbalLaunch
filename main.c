@@ -77,9 +77,8 @@ int simulate_vert() {
     }
 
     //Output stats
-    printf("state          : %d\n", system->state);
-    printf("ticks          : %lu s\n", system->ticks);
-    printf("delta_v remaing: %f m/s\n", rocket_ideal_delta_v(system->rocket));
+    printf("sys state      : %d\n", system->state);
+    printf("sys ticks      : %lu s\n", system->ticks);
     if(system->collect_stats)
         statistics_display(&system->stats);
 

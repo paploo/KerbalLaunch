@@ -46,6 +46,9 @@ void system_run(System *self) {
 
     //Setup
     system_log_header(self);
+    Frame frame;
+    frame_init(&frame);
+    self->frame = &frame;
 
     //Run
     self->state = SYSTEM_STATE_RUNNING;
@@ -53,7 +56,7 @@ void system_run(System *self) {
     double radial_velocity = planetoid_radial_velocity(self->planetoid, self->rocket->position, self->rocket->velocity);
 
     //We have the radial velocity cutoff a little below 0.0, because high tick rates with float precision can cause this to abort early.
-    while( altitude >= 0.0 && radial_velocity >= -0.001 ) {
+    while( altitude >= 0.0 && radial_velocity >= -0.0001 ) {
         if( system_time(self) > SYSTEM_MAX_MISSION_TIME ) {
             self->state = SYSTEM_STATE_ERROR;
             break;
@@ -63,17 +66,14 @@ void system_run(System *self) {
         radial_velocity = planetoid_radial_velocity(self->planetoid, self->rocket->position, self->rocket->velocity);
     }
 
+    //Cleanup
     if(self->state >= 0)
         self->state = SYSTEM_STATE_SUCCESS;
-
-    //Cleanup
-    self->stats.mission_time = system_time(self);
+    self->frame = NULL;
 }
 
 void system_run_one_tick(System *self) {
     //Allocate the frame on the stack and point to it.
-    Frame frame;
-    self->frame = &frame;
 
     //Got tired of writing self->delta_t.
     double delta_t = self->delta_t;
@@ -98,19 +98,23 @@ void system_run_one_tick(System *self) {
     double dy = 0.5*a.v[1]*delta_t*delta_t + self->rocket->velocity.v[1]*delta_t;
     Vector delta_r = vector_rect(dx,dy);
 
-    //Set the frame.
-    frame.ticks = self->ticks;
-    frame.t = system_time(self);
-    frame.mass = m;
-    frame.position = self->rocket->position;
-    frame.velocity = self->rocket->velocity;
-    frame.delta_t = delta_t;
-    frame.delta_mass = dm;
-    frame.delta_position = delta_r;
-    frame.delta_velocity = delta_v;
-    frame.radius = planetoid_position_radius(self->planetoid, self->frame->position);
-    frame.altitude = planetoid_position_altitude(self->planetoid, self->frame->position);
-    frame.azimuth = planetoid_position_azimuth(self->planetoid, self->frame->position);
+    //Set the parts of the frame that didn't come from other places.
+    self->frame->ticks = self->ticks;
+    self->frame->time = system_time(self);
+    self->frame->mass = m;
+    self->frame->position = self->rocket->position;
+    self->frame->velocity = self->rocket->velocity;
+    self->frame->delta_t = delta_t;
+    self->frame->delta_mass = dm;
+    self->frame->delta_position = delta_r;
+    self->frame->delta_velocity = delta_v;
+    self->frame->radius = planetoid_position_radius(self->planetoid, self->frame->position);
+    self->frame->altitude = planetoid_position_altitude(self->planetoid, self->frame->position);
+    self->frame->azimuth = planetoid_position_azimuth(self->planetoid, self->frame->position);
+    self->frame->energy = system_energy(self);
+    self->frame->angular_momentum = system_angular_momentum(self);
+    self->frame->rocket_remaining_fuel_mass = self->rocket->mass - self->rocket->empty_mass;
+    self->frame->rocket_remaining_ideal_delta_v = rocket_ideal_delta_v(self->rocket);
 
 #ifdef DEBUG
     frame_display(self->frame);
@@ -127,11 +131,10 @@ void system_run_one_tick(System *self) {
     self->rocket->position.v[0] += dx;
     self->rocket->position.v[1] += dy;
     self->ticks++;
-
-    //Cleanup
-    self->frame = NULL;
 }
 
+
+double rocket_remaining_ideal_delta_v;
 double system_time(const System *self) {
     return self->ticks * self->delta_t;
 }
@@ -179,12 +182,16 @@ void system_set_throttle(System *self) {
     double throttle;
 
     // If a throttle cutoff is set, consider if the current apoapsis is at or above that altitude.
-    double periapsis, apoapsis;
-    bool closed = false;
     bool consider_cutoff = self->throttle_cutoff_radius > 0.0;
-    if( consider_cutoff )
-        closed = system_apses(self, &periapsis, &apoapsis);
 
+    // Get the apoapsis/periapsis, and cache in the frame.
+    double periapsis, apoapsis;
+    bool closed = system_apses(self, &periapsis, &apoapsis);
+    self->frame->closed_orbit = closed;
+    self->frame->apoapsis = apoapsis;
+    self->frame->periapsis = periapsis;
+
+    // Calculate the throttle.
     if(consider_cutoff && (!closed || (apoapsis >= self->throttle_cutoff_radius))) {
         throttle = 0.0;
     } else {
@@ -194,7 +201,7 @@ void system_set_throttle(System *self) {
         assert(error==0);
     }
 
-    // Set
+    // Set the throttle.
     self->rocket->throttle = throttle;
     self->frame->throttle = throttle;
 }
@@ -230,26 +237,13 @@ void system_update_stats(System *self) {
     if(!self->collect_stats)
         return;
 
-    self->stats.distance_travelled += vector_mag(self->frame->delta_position);
+    /* The stats at apoapsis are really what is interesting. */
+    if(self->frame->radius > self->stats.frame.radius) {
+        self->stats.frame = *(self->frame);
 
+        self->stats.distance_travelled += vector_mag(self->frame->delta_position);
 
-    double periapsis = 0.0;
-    double apoapsis = 0.0;
-
-    if(self->frame->radius > self->stats.max_radius) {
-        self->stats.max_radius = self->frame->radius;
-        self->stats.max_altitude = self->frame->altitude;
-        self->stats.max_radius_time = self->frame->t;
-        self->stats.max_radius_position = self->frame->position;
-        self->stats.max_radius_velocity = self->frame->velocity;
-        self->stats.max_radius_energy = system_energy(self);
-        self->stats.max_radius_angular_momentum = system_angular_momentum(self);
-        if( system_apses(self, &periapsis, &apoapsis) ) {
-            self->stats.max_radius_apoapsis = apoapsis;
-            self->stats.max_radius_periapsis = periapsis;
-        }
-
-        double alpha = self->frame->delta_t / self->rocket->mass;
+        double alpha = self->frame->delta_t / self->frame->mass;
         self->stats.delta_v_thrust += alpha * vector_mag(self->frame->force_thrust);
         self->stats.delta_v_drag += alpha * vector_mag(self->frame->force_drag);
         self->stats.delta_v_gravity += alpha * vector_mag(self->frame->force_gravity);
@@ -278,7 +272,7 @@ void system_log_tick(const System *self) {
             self->log,
             "%lu, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
             self->frame->ticks,
-            self->frame->t,
+            self->frame->time,
             self->frame->mass,
             self->frame->delta_mass,
             VX(self->frame->position),
@@ -296,8 +290,11 @@ void system_log_tick(const System *self) {
 }
 
 bool orbit_apses(double gravitational_parameter, double angular_momentum, double energy, double *periapsis, double *apoapsis) {
-    if(energy >= 0.0)
+    if(energy >= 0.0) {
+        *apoapsis = INFINITY;
+        *periapsis = NAN;
         return false;
+    }
 
     double eccentricity = orbit_eccentricity(gravitational_parameter, angular_momentum, energy);
     double semimajor_axis = -(gravitational_parameter)/(2.0*energy);

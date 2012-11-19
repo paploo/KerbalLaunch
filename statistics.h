@@ -2,19 +2,11 @@
 #define KERBAL_LAUNCH_STATISTICS_H
 
 #include "vector.h"
+#include "frame.h"
 
+/* Statistics is a frame with aggregate values */
 typedef struct Statistics {
-    double mission_time;
-
-    double max_radius;
-    double max_altitude;
-    double max_radius_time;
-    double max_radius_energy;
-    double max_radius_angular_momentum;
-    double max_radius_apoapsis;
-    double max_radius_periapsis;
-    Vector max_radius_position;
-    Vector max_radius_velocity;
+    Frame frame;
 
     double distance_travelled;
 
