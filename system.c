@@ -66,6 +66,9 @@ void system_run(System *self) {
         radial_velocity = planetoid_radial_velocity(self->planetoid, self->rocket->position, self->rocket->velocity);
     }
 
+    //If we didn't collect stats, we take the last frame for the stats as it was at apex.
+    self->stats.frame = frame;
+
     //Cleanup
     if(self->state >= 0)
         self->state = SYSTEM_STATE_SUCCESS;

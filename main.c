@@ -79,8 +79,7 @@ int simulate_vert() {
     //Output stats
     printf("sys state      : %d\n", system->state);
     printf("sys ticks      : %lu s\n", system->ticks);
-    if(system->collect_stats)
-        statistics_display(&system->stats);
+    statistics_display(&system->stats);
 
     //Cleanup
     system_dealloc(system);
