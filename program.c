@@ -10,8 +10,10 @@ Program *program_alloc(void) {
 }
 
 void program_dealloc(Program *self) {
-    free(self->altitudes);
-    free(self->settings);
+    if(self->altitudes)
+        free(self->altitudes);
+    if(self->settings)
+        free(self->settings);
     free(self);
 }
 

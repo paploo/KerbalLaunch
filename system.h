@@ -2,6 +2,7 @@
 #define KERBAL_LAUNCH_SYSTEM_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "rocket.h"
 #include "program.h"
@@ -24,10 +25,10 @@ typedef struct System {
     Statistics stats; //The stats object is a static member of the system; the system itself can be thought of as a stats object.
 
     Rocket *rocket;
-    Planetoid *planetoid;
+    const Planetoid *planetoid;
 
-    Program *throttle_program;
-    Program *altitude_angle_program;
+    const Program *throttle_program;
+    const Program *altitude_angle_program;
     double throttle_cutoff_radius; //If the calculated apoapsis is above this value, cutoff the throttle.
 
     double delta_t;
