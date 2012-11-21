@@ -2,6 +2,7 @@ KerbalLaunch
 Jeff Reinecke
 jeff@paploo.net
 
+
 OVERVIEW
 
 Kerbal Launch Trajectory Optimizer.
@@ -10,6 +11,7 @@ The eventual goal is to simulate and optimize (using genetic algorithms) the
 launch trajectory of rockets in Kerbal Space Program.
 
 At this time it is kept simple: We only handle single-stage rockets.
+
 
 USE
 
@@ -24,13 +26,17 @@ parameters as well).
 It is also planned to be able to run a flight program and output a CSV file of
 its simulated trajectory for further analysis.
 
-Rough benchmarks on 2.8 GHz Intel Core Duo give about 2 million ticks/second on
-a single thread.
+Rough benchmarks on 2.8 GHz Intel Core Duo give in the region of 2 million
+ticks/second on asingle thread.
+
 
 DESIGN
 
 The program can be divided up into the simulation of a physical system, and the
 genetic flight program optimizer.
+
+
+Simulation
 
 The flight system is handled by a System struct, which is given (but does not
 own) a rocket, planetoid, and program for simulation.  The rocket is
@@ -46,26 +52,36 @@ with more complex logic at any time.
 
 The optimizer has yet to be constructed.
 
+
+Optimizer
+
+The flight program optimizer is given a seed program and a function pointer for
+getting a clean rocket instance.  It then runs the original seed, combined with
+N mutations through simulation.  At the end of simulation, the fitness of each
+is determined and the one with the highest fitness is taken as the new seed.
+
+Since the system parameters target an altitude for apex, we can calculate the
+final semimajor-axis of the orbit assuming all remaining fuel is burned at apex
+to raise the orbit periapsis out of the ground.  Note that we cannot use the
+remaining fuel (or delta_v) of the rocket directly, because the angular
+momentum of the trajectory may be low so the largets attainable orbit may not
+even avoid the planetoid surface.
+
+The program optimizer has a method for building N systems with different
+programs, and their own rocket instance to mutate.  These systems are then
+handed to a method that takes a void pointer to a system and runs it.  It then
+returns a void pointer to an allocated result structure that contains the
+fitness parameter; this method should conform to pthread start routine function
+so that it can be multithreaded, this also means the contents must be thread
+safe, hence the desire for fully formed separate system objects with separate
+mutatable stats (e.g. rocket instances).
+
+
 TODO
 
-To get full 2D support I need:
-[ ]Simulation cutoff:
-    [ ] To save on a lot of simulation time, if we are above the atmosphere and
-        have reached apoapsis, we can use the rocket equation to assume a delta-v
-        and, since we are at an apsis, calculate the resulting alt of hte other
-        apsis.  This will allow us to use semimajor-axis of an orbit as a fitness
-        function.
-    [ ] Escape orbits can be detected if the energy >= 0.
-    [+] Assuming we don't simulate burn at apex (which would give us time to fall),
-        we can cutoff the simulation when the radial velocity (relative to the
-        planetoid) is negative.  To be safer, we can do this when it is negative
-        and we are below theedge of the atmosphere, at which point we'd have
-        atmospheric decay and a possible--but not idael--orbit.
-      * NOTE: http://www.braeunig.us/space/orbmech.htm may help with this.
-[ ] Program Addition for a variable cutoff altitude at which we cut-off engines
-    and coast to near apoapsis altitude before burning.
-[+] Take into account initial velocity from planetoid rotation.
-[ ] What is a good fitness function?
+Genetic Routine:
+
+[ ] Define
 
 LICENSE
 
