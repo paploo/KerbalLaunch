@@ -23,7 +23,7 @@ int simulate_vert() {
     Planetoid *kerbin = planetoid_init(planetoid_alloc());
 
     //Build the rocket
-    Rocket *rocket = init_small_rocket(rocket_alloc());
+    Rocket *rocket = init_large_rocket(rocket_alloc());
     rocket->position.v[1] = kerbin->radius + 72.0; // Small rocket sits at 72.0m on pad.
     rocket->velocity.v[0] = kerbin->radius * 0.0002908882086657216; // Surface rotational velocity.
 
@@ -35,6 +35,8 @@ int simulate_vert() {
     Program *altitude_angle_program = program_init(program_alloc(), 1);
     altitude_angle_program->altitudes[0] = -600000.0;
     altitude_angle_program->settings[0] = M_PI/2.0;
+
+    double throttle_cutoff_radius = kerbin->radius + 80000;
 
     //Override settings to test a circular orbit
     /*
@@ -52,6 +54,7 @@ int simulate_vert() {
     system->rocket = rocket;
     system->throttle_program = throttle_program;
     system->altitude_angle_program = altitude_angle_program;
+    system->throttle_cutoff_radius = throttle_cutoff_radius;
     system->logging = true;
     system->collect_stats = true;
 
@@ -74,10 +77,9 @@ int simulate_vert() {
     }
 
     //Output stats
-    printf("state          : %d\n", system->state);
-    printf("ticks          : %lu\n", system->ticks);
-    if(system->collect_stats)
-        statistics_display(&system->stats);
+    printf("sys state      : %d\n", system->state);
+    printf("sys ticks      : %lu s\n", system->ticks);
+    statistics_display(&system->stats);
 
     //Cleanup
     system_dealloc(system);
