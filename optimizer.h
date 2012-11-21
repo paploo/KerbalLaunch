@@ -14,8 +14,8 @@ typedef void *(*FactoryFunc)(void);
 
 typedef struct OptimizerSystemResult {
     double fitness;
-    double *throttle_program;
-    double *altitude_angle_program;
+    const Program *throttle_program;
+    const Program *altitude_angle_program;
 } OptimizerSystemResult;
 
 typedef struct Optimizer {
@@ -28,8 +28,8 @@ typedef struct Optimizer {
     const Program *seed_altitude_angle_program;
     double throttle_cutoff_radius;
 
-    const Program *best_throttle_program;
-    const Program *best_altitude_angle_program;
+    Program *best_throttle_program;
+    Program *best_altitude_angle_program;
     double best_fitness;
 
     unsigned generation;

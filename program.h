@@ -10,7 +10,7 @@ typedef struct Program {
 Program *program_alloc(void);
 void program_dealloc(Program *self);
 Program *program_init(Program *self, size_t length);
-Program *program_init_copy(Program *self, Program *src);
+Program *program_init_copy(Program *self, const Program *src);
 
 double program_lookup(const Program *self, double input, int *error);
 

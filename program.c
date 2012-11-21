@@ -10,10 +10,8 @@ Program *program_alloc(void) {
 }
 
 void program_dealloc(Program *self) {
-    if(self->altitudes)
-        free(self->altitudes);
-    if(self->settings)
-        free(self->settings);
+    free(self->altitudes);
+    free(self->settings);
     free(self);
 }
 
@@ -24,7 +22,7 @@ Program *program_init(Program *self, size_t length) {
     return self;
 }
 
-Program *program_init_copy(Program *self, Program *src) {
+Program *program_init_copy(Program *self, const Program *src) {
     program_init(self, src->length);
     size_t length_in_bytes = src->length * sizeof(double);
     memcpy(self->altitudes, src->altitudes, length_in_bytes);

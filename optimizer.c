@@ -12,10 +12,8 @@ Optimizer *optimizer_alloc(void) {
 }
 
 void optimizer_dealloc(Optimizer *self) {
-    if(self->best_throttle_program)
-        program_dealloc(self->best_throttle_program);
-    if(self->best_altitude_angle_program)
-        program_dealloc(self->best_altitude_angle_program);
+    program_dealloc(self->best_throttle_program);
+    program_dealloc(self->best_altitude_angle_program);
     free(self);
 }
 
@@ -72,17 +70,14 @@ double optimizer_run_generation(Optimizer *self) {
         pthread_join(threads[i], (void *)(&result));
         //Keep?
         if(result && (result->fitness > self->best_fitness)) {
-            if(self->best_throttle_program)
-                program_dealloc(self->best_throttle_program);
+            program_dealloc(self->best_throttle_program);
             self->best_throttle_program = program_init_copy(program_alloc(), result->throttle_program);
-            if(self->best_altitude_angle_program)
-                program_dealloc(self->best_altitude_angle_program);
+            program_dealloc(self->best_altitude_angle_program);
             self->best_altitude_angle_program = program_init_copy(program_alloc(), result->altitude_angle_program);
             self->best_fitness = result->fitness;
         }
         //Cleanup
-        if(result)
-            free(result);
+        free(result);
     }
 
     //Cleanup
@@ -103,7 +98,7 @@ OptimizerSystemResult *optimizer_run_system(System *system) {
         double radius = system->stats.frame.radius;
         double initial_horizontal_velocity = planetoid_horizontal_velocity(system->planetoid, system->stats.frame.position, system->stats.frame.velocity);
 
-        double rocket_delta_v = rocket_dieal_delta_v(system->rocket);
+        double rocket_delta_v = rocket_ideal_delta_v(system->rocket);
 
         double velocity = fabs(initial_horizontal_velocity) + rocket_delta_v; //fabs because direction doesn't matter.
 
@@ -112,8 +107,10 @@ OptimizerSystemResult *optimizer_run_system(System *system) {
 
         double periapsis = 0.0;
         double apoapsis = 0.0;
-        double closed = orbit_aspes(grav_param, angular_momentum, energy, &periapsis, &apoapsis);
+        orbit_apses(grav_param, angular_momentum, energy, &periapsis, &apoapsis);
 
+        //TODO: Instead of using semimajor axis, we should circularize and look at remaining delta_v,
+        //this will let us deal with hyperbolic orbits better.
         semimajor_axis = (periapsis+apoapsis) / 2.0;
     }
 
@@ -145,8 +142,8 @@ System **optimizer_make_systems(const Optimizer *self) {
 void optimizer_destroy_systems(System **systems) {
     for(size_t i=0; i<OPTIMIZER_CHILDREN; i++) {
         rocket_dealloc(systems[i]->rocket);
-        program_dealloc(systems[i]->throttle_program);
-        program_dealloc(systems[i]->altitude_angle_program);
+        program_dealloc( (Program *)(systems[i]->throttle_program) ); //Cast from const to non-const for this call.
+        program_dealloc( (Program *)(systems[i]->altitude_angle_program) ); //Cast rom const to non-const for this call.
         system_dealloc(systems[i]);
     }
     free(systems);
