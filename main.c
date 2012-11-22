@@ -34,13 +34,21 @@ int optimize(void) {
     kerbin_radius = kerbin->radius;
 
     //Builde the seed programs.
-    Program *seed_throttle_program = program_init(program_alloc(), 1);
+    Program *seed_throttle_program = program_init(program_alloc(), 3);
     seed_throttle_program->altitudes[0] = -kerbin_radius;
     seed_throttle_program->settings[0] = 1.0;
+    seed_throttle_program->altitudes[1] = 1000.0;
+    seed_throttle_program->settings[1] = 0.7;
+    seed_throttle_program->altitudes[2] = 15000.0;
+    seed_throttle_program->settings[2] = 1.0;
 
-    Program *seed_altitude_angle_program = program_init(program_alloc(), 1);
+    Program *seed_altitude_angle_program = program_init(program_alloc(), 3);
     seed_altitude_angle_program->altitudes[0] = -kerbin_radius;
-    seed_altitude_angle_program->settings[0] = M_PI*2.0;
+    seed_altitude_angle_program->settings[0] = M_PI/2.0;
+    seed_altitude_angle_program->altitudes[1] = 1000.0;
+    seed_altitude_angle_program->settings[1] = 80 * M_PI/180.0;
+    seed_altitude_angle_program->altitudes[2] = 15000.0;
+    seed_altitude_angle_program->settings[2] = 45 * M_PI/180.0;
 
     double throttle_cutoff_radius = kerbin_radius + 80000.0;
 
@@ -51,7 +59,7 @@ int optimize(void) {
     optimizer->seed_throttle_program = seed_throttle_program;
     optimizer->seed_altitude_angle_program = seed_altitude_angle_program;
     optimizer->throttle_cutoff_radius = throttle_cutoff_radius;
-    optimizer->generations = 40;
+    optimizer->generations = 128;
 
     //Run
     optimizer_run(optimizer);

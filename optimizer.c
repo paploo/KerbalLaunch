@@ -46,7 +46,7 @@ double optimizer_run(Optimizer *self) {
 
     //Now run.
     while(self->generation < self->generations) {
-        printf(".");
+        printf("."); fflush(stdout);
         optimizer_run_generation(self);
         self->generation++;
     }
