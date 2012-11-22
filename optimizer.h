@@ -10,7 +10,7 @@
 #define THROTTLE_INTERVALS 6 //N intervals means throttle settings will be in [0.0,1.0] with step 1/N.
 #define ALTITUDE_ANGLE_INTERVALS 9 //N intervals means throttle settings will be in [0.0,2*PI] with step 2*PI/N.
 
-typedef void *(*FactoryFunc)(void);
+typedef void *(*InitFunc)(void *);
 
 typedef struct OptimizerSystemResult {
     double fitness;
@@ -20,7 +20,7 @@ typedef struct OptimizerSystemResult {
 
 typedef struct Optimizer {
     // The function to call to get a fresh rocket instance for simulation.
-    FactoryFunc rocket_factory_func;
+    InitFunc rocket_factory_func;
 
     const Planetoid *planetoid;
 
@@ -40,7 +40,7 @@ Optimizer *optimizer_alloc(void);
 void optimizer_dealloc(Optimizer *self);
 Optimizer *optimizer_init(Optimizer *self);
 
-double optimizer_optimize(Optimizer *self);
+double optimizer_run(Optimizer *self);
 
 double optimizer_run_generation(Optimizer *self);
 OptimizerSystemResult *optimizer_run_system(System *system); //Must be p_thread thread_function compliant sig.

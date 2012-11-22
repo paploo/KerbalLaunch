@@ -184,5 +184,5 @@ Program *optimizer_mutate_altitude_angle_program(const Program *program) {
 }
 
 Rocket *optimizer_make_rocket(const Optimizer *self) {
-    return (Rocket *)self->rocket_factory_func();
+    return (Rocket *)self->rocket_factory_func(rocket_alloc());
 }

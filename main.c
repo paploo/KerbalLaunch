@@ -4,28 +4,79 @@
 #include <time.h>
 
 #include "system.h"
+#include "optimizer.h"
 
-int simulate_vert();
+int optimize(void);
+int simulate_vertical(void);
+
 Rocket *init_small_rocket(Rocket *rocket);
 Rocket *init_large_rocket(Rocket *rocket);
 
-int main(){
+double kerbin_radius;
+
+int main(void){
     clock_t start = clock();
-    int result = simulate_vert();
+    int result = optimize();
     clock_t stop = clock();
     clock_t delta_t = stop-start;
     printf("TIME: %f ms\n", ((double)delta_t)/CLOCKS_PER_SEC);
     return result;
 }
 
-int simulate_vert() {
+int optimize(void) {
     //Build the planetoid
     Planetoid *kerbin = planetoid_init(planetoid_alloc());
+    kerbin_radius = kerbin->radius;
+
+    //Builde the seed programs.
+    Program *seed_throttle_program = program_init(program_alloc(), 1);
+    seed_throttle_program->altitudes[0] = -kerbin_radius;
+    seed_throttle_program->settings[0] = 1.0;
+
+    Program *seed_altitude_angle_program = program_init(program_alloc(), 1);
+    seed_altitude_angle_program->altitudes[0] = -kerbin_radius;
+    seed_altitude_angle_program->settings[0] = M_PI*2.0;
+
+    double throttle_cutoff_radius = kerbin_radius + 80000.0;
+
+    //Build the optimizer
+    Optimizer *optimizer = optimizer_init(optimizer_alloc());
+    optimizer->rocket_factory_func = (InitFunc)init_large_rocket;
+    optimizer->planetoid = kerbin;
+    optimizer->seed_throttle_program = seed_throttle_program;
+    optimizer->seed_altitude_angle_program = seed_altitude_angle_program;
+    optimizer->throttle_cutoff_radius = throttle_cutoff_radius;
+
+    //Run
+    optimizer_run(optimizer);
+
+    //Show Best Result
+    printf("Generation: %d", optimizer->generation);
+    printf("Fitness: %f\n", optimizer->best_fitness);
+    printf("Throttle Program:\n");
+    program_display(optimizer->best_throttle_program);
+    printf("Altitude Angle Program:\n");
+    program_display(optimizer->best_altitude_angle_program);
+
+    //Simulate best program to gather statistics.
+    //TODO: Simulate best program to gather stats.
+
+    //Cleanup
+    optimizer_dealloc(optimizer);
+    planetoid_dealloc(kerbin);
+    program_dealloc(seed_throttle_program);
+    program_dealloc(seed_altitude_angle_program);
+
+    return 0;
+}
+
+int simulate_vertical(void) {
+    //Build the planetoid
+    Planetoid *kerbin = planetoid_init(planetoid_alloc());
+    kerbin_radius = kerbin->radius;
 
     //Build the rocket
     Rocket *rocket = init_large_rocket(rocket_alloc());
-    rocket->position.v[1] = kerbin->radius + 72.0; // Small rocket sits at 72.0m on pad.
-    rocket->velocity.v[0] = kerbin->radius * 0.0002908882086657216; // Surface rotational velocity.
 
     //Build the programs
     Program *throttle_program = program_init(program_alloc(), 1);
@@ -103,6 +154,9 @@ Rocket *init_small_rocket(Rocket *rocket) {
 
     rocket->max_drag = 0.2;
 
+    rocket->position.v[1] = kerbin_radius + 72.0; // Small rocket sits at 72.0m on pad.
+    rocket->velocity.v[0] = kerbin_radius * 0.0002908882086657216; // Surface rotational velocity.
+
     return rocket;
 }
 
@@ -117,6 +171,9 @@ Rocket *init_large_rocket(Rocket *rocket) {
     rocket->isp_atm = 320.0;
 
     rocket->max_drag = 0.2;
+
+    rocket->position.v[1] = kerbin_radius + 72.0; // Small rocket sits at 72.0m on pad.
+    rocket->velocity.v[0] = kerbin_radius * 0.0002908882086657216; // Surface rotational velocity.
 
     return rocket;
 }
