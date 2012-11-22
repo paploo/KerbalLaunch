@@ -14,6 +14,7 @@ Program *program_init_copy(Program *self, const Program *src);
 
 double program_lookup(const Program *self, double input, int *error);
 
+void program_display_converted(const Program *self, double conversion);
 void program_display(const Program *self);
 
 #endif

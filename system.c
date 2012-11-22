@@ -118,10 +118,6 @@ void system_run_one_tick(System *self) {
     self->frame->rocket_remaining_fuel_mass = self->rocket->mass - self->rocket->empty_mass;
     self->frame->rocket_remaining_ideal_delta_v = rocket_ideal_delta_v(self->rocket);
 
-#ifdef DEBUG
-    frame_display(self->frame);
-#endif
-
     //Then record the rame statistics.
     system_update_stats(self);
     system_log_tick(self);

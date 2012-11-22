@@ -48,9 +48,13 @@ double program_lookup(const Program *self, double altitude, int *error) {
 }
 
 void program_display(const Program *self) {
+    program_display_converted(self, 1.0);
+}
+
+void program_display_converted(const Program *self, double conversion) {
     printf("<program\n");
     for(size_t i=0; i<self->length; i++) {
-        printf("\t[%lu] %6.0f -> %0.3f\n", i, self->altitudes[i], self->settings[i]);
+        printf("\t[%lu] %6.0f -> %0.3f\n", i, self->altitudes[i], conversion*self->settings[i]);
     }
     printf(">\n");
 }

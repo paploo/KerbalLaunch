@@ -28,7 +28,7 @@ Optimizer *optimizer_init(Optimizer *self) {
 
     self->best_throttle_program = NULL;
     self->best_altitude_angle_program = NULL;
-    self->best_fitness = 0.0;
+    self->best_fitness = -INFINITY;
 
     srand(time(NULL));
     self->generation = 0;
@@ -46,8 +46,9 @@ double optimizer_run(Optimizer *self) {
 
     //Now run.
     while(self->generation < self->generations) {
+        printf(".");
         optimizer_run_generation(self);
-        self->generations++;
+        self->generation++;
     }
 
     //Return best fitness value.
@@ -132,7 +133,7 @@ System **optimizer_make_systems(const Optimizer *self) {
         systems[i]->planetoid = self->planetoid;
         systems[i]->rocket = optimizer_make_rocket(self);
         systems[i]->throttle_program = optimizer_mutate_throttle_program(self->best_throttle_program);
-        systems[i]->altitude_angle_program = optimizer_mutate_throttle_program(self->best_altitude_angle_program);
+        systems[i]->altitude_angle_program = optimizer_mutate_altitude_angle_program(self->best_altitude_angle_program);
         systems[i]->throttle_cutoff_radius = self->throttle_cutoff_radius;
     }
 

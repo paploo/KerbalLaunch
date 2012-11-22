@@ -7,6 +7,8 @@
 #include "optimizer.h"
 
 int optimize(void);
+void simulate_optimized_system(Optimizer *optimizer);
+
 int simulate_vertical(void);
 
 Rocket *init_small_rocket(Rocket *rocket);
@@ -46,20 +48,21 @@ int optimize(void) {
     optimizer->seed_throttle_program = seed_throttle_program;
     optimizer->seed_altitude_angle_program = seed_altitude_angle_program;
     optimizer->throttle_cutoff_radius = throttle_cutoff_radius;
+    optimizer->generations = 40;
 
     //Run
     optimizer_run(optimizer);
 
     //Show Best Result
-    printf("Generation: %d", optimizer->generation);
+    printf("Generation: %d\n", optimizer->generation);
     printf("Fitness: %f\n", optimizer->best_fitness);
     printf("Throttle Program:\n");
     program_display(optimizer->best_throttle_program);
     printf("Altitude Angle Program:\n");
-    program_display(optimizer->best_altitude_angle_program);
+    program_display_converted(optimizer->best_altitude_angle_program, 180.0/M_PI);
 
     //Simulate best program to gather statistics.
-    //TODO: Simulate best program to gather stats.
+    simulate_optimized_system(optimizer);
 
     //Cleanup
     optimizer_dealloc(optimizer);
@@ -68,6 +71,36 @@ int optimize(void) {
     program_dealloc(seed_altitude_angle_program);
 
     return 0;
+}
+
+void simulate_optimized_system(Optimizer *optimizer) {
+    // Create the system.
+    System *system = system_init(system_alloc());
+    system->planetoid = optimizer->planetoid;
+    system->rocket = optimizer_make_rocket(optimizer);
+    system->throttle_program = optimizer->best_throttle_program;
+    system->altitude_angle_program = optimizer->best_altitude_angle_program;
+    system->throttle_cutoff_radius = optimizer->throttle_cutoff_radius;
+    system->logging = true;
+    system->collect_stats = true;
+
+    //Simulate
+    system->log = fopen("_optimized_rocket.csv", "w+");
+
+    system_run(system);
+
+    fclose(system->log);
+    system->log = stdout;
+
+    //Calculate biggest orbit
+
+
+    //Display Output
+    statistics_display(&system->stats);
+
+    //Cleanup
+    free(system->rocket);
+    free(system);
 }
 
 int simulate_vertical(void) {
