@@ -287,10 +287,15 @@ void system_log_tick(const System *self) {
         );
 }
 
+/*
+ * For closed orbits, the periapsis and apoapsis are as expected.
+ * For open orbits, the apoapsis is a negative value that approaches zero as the exces velocity increases.
+ * For hyperbolic orbits, the apoapsis is infinite.
+ */
 bool orbit_apses(double gravitational_parameter, double angular_momentum, double energy, double *periapsis, double *apoapsis) {
-    if(energy >= 0.0) {
+    if(energy == 0.0) {
         *apoapsis = INFINITY;
-        *periapsis = NAN;
+        *periapsis = angular_momentum*angular_momentum / (2.0*gravitational_parameter);
         return false;
     }
 
@@ -300,7 +305,7 @@ bool orbit_apses(double gravitational_parameter, double angular_momentum, double
     *periapsis = semimajor_axis * (1.0 - eccentricity);
     *apoapsis = semimajor_axis * (1.0 + eccentricity);
 
-    return true;
+    return (energy > 0.0) ? false : true;
 }
 
 double orbit_eccentricity(double gravitational_parameter, double angular_momentum, double energy) {

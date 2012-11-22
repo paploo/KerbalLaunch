@@ -90,36 +90,42 @@ OptimizerSystemResult *optimizer_run_system(System *system) {
     //Run system.
     system_run(system);
 
-    //Calculate final semimajor axis.
-    double semimajor_axis = 0.0;
+    //Circularize, and then calculate the excess velocity.
+    double excess_delta_v = -INFINITY;
 
     if( system->state == SYSTEM_STATE_SUCCESS ) {
         double grav_param = system->planetoid->gravitational_parameter;
 
-        double radius = system->stats.frame.radius;
-        double initial_horizontal_velocity = planetoid_horizontal_velocity(system->planetoid, system->stats.frame.position, system->stats.frame.velocity);
+        double target_radius = system->throttle_cutoff_radius;
+        double v_circ = sqrt(grav_param/target_radius);
 
+        double radius = system->stats.frame.radius;
+
+        double initial_horizontal_velocity = fabs( planetoid_horizontal_velocity(system->planetoid, system->stats.frame.position, system->stats.frame.velocity) );
         double rocket_delta_v = rocket_ideal_delta_v(system->rocket);
 
-        double velocity = fabs(initial_horizontal_velocity) + rocket_delta_v; //fabs because direction doesn't matter.
+        /*
+         * If we reached target, then we can calculate circularization correctly.
+         * If we don't reach target, the calculation neglects air resistance so
+         * it makes it appear you can get there with way less fuel.
+         * While we could just not let any non-functional orbit score higher than
+         * -inf, we still want the best one to win, so we give it a penalized
+         * version (it's treated as out of fuel), dropping it down.
+         * NOTE: I'm still not sure that this will always work correctly.
+         */
+        if(radius >= target_radius)
+            excess_delta_v = initial_horizontal_velocity + rocket_delta_v - v_circ;
+        else
+            excess_delta_v = initial_horizontal_velocity - v_circ;
 
-        double angular_momentum = radius * velocity; //Only works this nicely at apsis.
-        double energy = 0.5*velocity*velocity - grav_param/radius;
-
-        double periapsis = 0.0;
-        double apoapsis = 0.0;
-        orbit_apses(grav_param, angular_momentum, energy, &periapsis, &apoapsis);
-
-        //TODO: Instead of using semimajor axis, we should circularize and look at remaining delta_v,
-        //this will let us deal with hyperbolic orbits better.
-        semimajor_axis = (periapsis+apoapsis) / 2.0;
+        //printf("%f\t%f\t%f\t%f\t%f\n", excess_delta_v, radius, v_circ, initial_horizontal_velocity, rocket_delta_v);
     }
 
     //Allocate and fillin result.
     OptimizerSystemResult *result = (OptimizerSystemResult *)malloc(sizeof(OptimizerSystemResult));
     result->throttle_program = system->throttle_program;
     result->altitude_angle_program = system->altitude_angle_program;
-    result->fitness = semimajor_axis;
+    result->fitness = excess_delta_v;
 
     //Return.
     return result;
@@ -175,7 +181,7 @@ Program *optimizer_mutate_altitude_angle_program(const Program *program) {
     size_t i = rand() % program->length;
 
     //Choose a value for it.
-    double altitude_angle = M_PI * 2.0 * ((double)(rand() % (ALTITUDE_ANGLE_INTERVALS+1)) / (double)ALTITUDE_ANGLE_INTERVALS);
+    double altitude_angle = (M_PI/2.0) * ((double)(rand() % (ALTITUDE_ANGLE_INTERVALS+1)) / (double)ALTITUDE_ANGLE_INTERVALS);
 
     //Set it
     mutant_program->settings[i] = altitude_angle;

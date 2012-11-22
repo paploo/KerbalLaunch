@@ -14,6 +14,9 @@ int simulate_vertical(void);
 Rocket *init_small_rocket(Rocket *rocket);
 Rocket *init_large_rocket(Rocket *rocket);
 
+//Given a system who terminated at apex, calculate the best periapsis/apoapsis.
+bool biggest_orbit(const System *system, double *periapsis, double *apoapsis);
+
 double kerbin_radius;
 
 int main(void){
@@ -92,15 +95,41 @@ void simulate_optimized_system(Optimizer *optimizer) {
     fclose(system->log);
     system->log = stdout;
 
-    //Calculate biggest orbit
+    //Calculate biggest possible orbit
+    if( system->state == SYSTEM_STATE_SUCCESS ) {
+        double periapsis = 0.0;
+        double apoapsis = 0.0;
+        biggest_orbit(system, &periapsis, &apoapsis);
+
+        printf("Largest Orbit:\n");
+        printf("periapsis radus: %f m\n", periapsis);
+        printf("apoapsis radius: %f m\n", apoapsis);
+    }
 
 
     //Display Output
+    printf("Apex Frame:\n");
     statistics_display(&system->stats);
 
     //Cleanup
     free(system->rocket);
     free(system);
+}
+
+bool biggest_orbit(const System *system, double *periapsis, double *apoapsis) {
+    double grav_param = system->planetoid->gravitational_parameter;
+
+    double radius = system->stats.frame.radius;
+    double initial_horizontal_velocity = planetoid_horizontal_velocity(system->planetoid, system->stats.frame.position, system->stats.frame.velocity);
+
+    double rocket_delta_v = rocket_ideal_delta_v(system->rocket);
+
+    double velocity = fabs(initial_horizontal_velocity) + rocket_delta_v; //fabs because direction doesn't matter.
+
+    double angular_momentum = radius * velocity; //Only works this nicely at apsis.
+    double energy = 0.5*velocity*velocity - grav_param/radius;
+
+    return orbit_apses(grav_param, angular_momentum, energy, periapsis, apoapsis);
 }
 
 int simulate_vertical(void) {
