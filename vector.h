@@ -3,7 +3,8 @@
 
 #include <math.h>
 
-#define DEGREE 57.29577951308232
+#define DEGREE 0.017453292519943295
+#define RADIAN 57.29577951308232
 
 #define VECTOR_DIMS 2
 

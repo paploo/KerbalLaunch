@@ -44,12 +44,31 @@ double optimizer_run(Optimizer *self) {
     self->best_throttle_program = program_init_copy(program_alloc(), self->seed_throttle_program);
     self->best_altitude_angle_program = program_init_copy(program_alloc(), self->seed_altitude_angle_program);
 
-    //Now run.
+    //Run system with seed programs to find fitness to seed fitness.
+    System *system = system_init(system_alloc());
+    system->planetoid = self->planetoid;
+    system->rocket = optimizer_make_rocket(self);
+    system->throttle_program = self->best_throttle_program;
+    system->altitude_angle_program = self->best_altitude_angle_program;
+    system->throttle_cutoff_radius = self->throttle_cutoff_radius;
+
+    OptimizerSystemResult *result = optimizer_run_system(system);
+    self->best_fitness = result->fitness;
+    printf("Seed Program Fitness: %f\n", self->best_fitness);
+
+    free(result);
+    rocket_dealloc(system->rocket);
+    system_dealloc(system);
+
+
+    //Now run generations.
     while(self->generation < self->generations) {
-        printf("."); fflush(stdout);
+            printf(".");
+            fflush(stdout);
         optimizer_run_generation(self);
         self->generation++;
     }
+    printf("\n");
 
     //Return best fitness value.
     return self->best_fitness;
@@ -70,6 +89,7 @@ double optimizer_run_generation(Optimizer *self) {
         OptimizerSystemResult *result = NULL;
         pthread_join(threads[i], (void *)(&result));
         //Keep?
+        //printf("%f > %f\n", result ? result->fitness : 0.0, self->best_fitness);
         if(result && (result->fitness > self->best_fitness)) {
             program_dealloc(self->best_throttle_program);
             self->best_throttle_program = program_init_copy(program_alloc(), result->throttle_program);
@@ -165,6 +185,8 @@ Program *optimizer_mutate_throttle_program(const Program *program) {
 
     //Choose a value for it between 0.0-1.0, with the given number of intervals.
     double throttle = (double)(rand() % (THROTTLE_INTERVALS+1)) / (double)THROTTLE_INTERVALS;
+    assert(throttle >= 0.0);
+    assert(throttle <= 1.0);
 
     //Set it
     mutant_program->settings[i] = throttle;
@@ -182,6 +204,8 @@ Program *optimizer_mutate_altitude_angle_program(const Program *program) {
 
     //Choose a value for it.
     double altitude_angle = (M_PI/2.0) * ((double)(rand() % (ALTITUDE_ANGLE_INTERVALS+1)) / (double)ALTITUDE_ANGLE_INTERVALS);
+    assert(altitude_angle >= 0.0);
+    assert(altitude_angle <= M_PI/2.0);
 
     //Set it
     mutant_program->settings[i] = altitude_angle;

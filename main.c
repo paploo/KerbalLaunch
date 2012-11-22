@@ -2,9 +2,14 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#include <assert.h>
 
 #include "system.h"
 #include "optimizer.h"
+
+#define OPTIMIZATION_SYSTEM_RUNS (16384)
+
+#define TWELFTH 0.16666666666666666
 
 int optimize(void);
 void simulate_optimized_system(Optimizer *optimizer);
@@ -13,6 +18,9 @@ int simulate_vertical(void);
 
 Rocket *init_small_rocket(Rocket *rocket);
 Rocket *init_large_rocket(Rocket *rocket);
+
+Program *init_throttle_seed(Program *program);
+Program *init_altitude_angle_seed(Program *program);
 
 //Given a system who terminated at apex, calculate the best periapsis/apoapsis.
 bool biggest_orbit(const System *system, double *periapsis, double *apoapsis);
@@ -34,21 +42,11 @@ int optimize(void) {
     kerbin_radius = kerbin->radius;
 
     //Builde the seed programs.
-    Program *seed_throttle_program = program_init(program_alloc(), 3);
-    seed_throttle_program->altitudes[0] = -kerbin_radius;
-    seed_throttle_program->settings[0] = 1.0;
-    seed_throttle_program->altitudes[1] = 1000.0;
-    seed_throttle_program->settings[1] = 0.7;
-    seed_throttle_program->altitudes[2] = 15000.0;
-    seed_throttle_program->settings[2] = 1.0;
+    Program *seed_throttle_program = program_init(program_alloc(), 9);
+    init_throttle_seed(seed_throttle_program);
 
-    Program *seed_altitude_angle_program = program_init(program_alloc(), 3);
-    seed_altitude_angle_program->altitudes[0] = -kerbin_radius;
-    seed_altitude_angle_program->settings[0] = M_PI/2.0;
-    seed_altitude_angle_program->altitudes[1] = 1000.0;
-    seed_altitude_angle_program->settings[1] = 80 * M_PI/180.0;
-    seed_altitude_angle_program->altitudes[2] = 15000.0;
-    seed_altitude_angle_program->settings[2] = 45 * M_PI/180.0;
+    Program *seed_altitude_angle_program = program_init(program_alloc(), 9);
+    init_altitude_angle_seed(seed_altitude_angle_program);
 
     double throttle_cutoff_radius = kerbin_radius + 80000.0;
 
@@ -59,13 +57,14 @@ int optimize(void) {
     optimizer->seed_throttle_program = seed_throttle_program;
     optimizer->seed_altitude_angle_program = seed_altitude_angle_program;
     optimizer->throttle_cutoff_radius = throttle_cutoff_radius;
-    optimizer->generations = 128;
+    //optimizer->generations = (64*16)/OPTIMIZER_CHILDREN;
+    optimizer->generations = OPTIMIZATION_SYSTEM_RUNS/OPTIMIZER_CHILDREN;
 
     //Run
     optimizer_run(optimizer);
 
     //Show Best Result
-    printf("Generation: %d\n", optimizer->generation);
+    printf("Generations x Children: %d x %d = %d\n", optimizer->generation, OPTIMIZER_CHILDREN, OPTIMIZER_CHILDREN*optimizer->generations);
     printf("Fitness: %f\n", optimizer->best_fitness);
     printf("Throttle Program:\n");
     program_display(optimizer->best_throttle_program);
@@ -246,4 +245,30 @@ Rocket *init_large_rocket(Rocket *rocket) {
     rocket->velocity.v[0] = kerbin_radius * 0.0002908882086657216; // Surface rotational velocity.
 
     return rocket;
+}
+
+Program *init_throttle_seed(Program *program) {
+    const size_t dim = 9;
+    assert(program->length == dim);
+    double altitudes[] = {-600000.0, 1000.0, 2000.0, 5000.0, 12000.0, 23000.0, 35000.0, 45000.0, 60000.0};
+    //double settings[] = {1.0, 0.9, 0.7, 0.5, 0.6, 0.8, 0.8, 0.9, 1.0};
+    double settings[] = {1.0, 1.0, 1.0, 1.0, 11*TWELFTH, 8*TWELFTH, 8*TWELFTH, 5*TWELFTH, 4*TWELFTH};
+    for(size_t i=0; i<dim; i++) {
+        program->altitudes[i] = altitudes[i];
+        program->settings[i] = settings[i];
+    }
+    return program;
+}
+
+Program *init_altitude_angle_seed(Program *program) {
+    const size_t dim = 9;
+    assert(program->length == dim);
+    double altitudes[] = {-600000.0, 1000.0, 2000.0, 5000.0, 12000.0, 23000.0, 35000.0, 45000.0, 60000.0};
+    //double settings[] = {90*DEGREE, 85*DEGREE, 85*DEGREE, 90*DEGREE, 45*DEGREE, 30*DEGREE, 10*DEGREE, 5*DEGREE, 0*DEGREE};
+    double settings_degree[] ={90.0, 90.0, 90.0, 85.0, 50.0, 20.0, 10.0, 5.0, 5.0};
+    for(size_t i=0; i<dim; i++) {
+        program->altitudes[i] = altitudes[i];
+        program->settings[i] = settings_degree[i] * DEGREE;
+    }
+    return program;
 }
