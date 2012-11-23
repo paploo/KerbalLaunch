@@ -10,6 +10,7 @@
 #define OPTIMIZATION_SYSTEM_RUNS (16384)
 
 #define TWELFTH 0.16666666666666666
+#define FIFTEENTH 0.06666666666666667
 
 int optimize(void);
 void simulate_optimized_system(Optimizer *optimizer);
@@ -252,10 +253,10 @@ Program *init_throttle_seed(Program *program) {
     assert(program->length == dim);
     double altitudes[] = {-600000.0, 1000.0, 2000.0, 5000.0, 12000.0, 23000.0, 35000.0, 45000.0, 60000.0};
     //double settings[] = {1.0, 0.9, 0.7, 0.5, 0.6, 0.8, 0.8, 0.9, 1.0};
-    double settings[] = {1.0, 1.0, 1.0, 1.0, 11*TWELFTH, 8*TWELFTH, 8*TWELFTH, 5*TWELFTH, 4*TWELFTH};
+    double settings[] = {15, 15, 15, 15, 15, 8, 13, 4, 1};
     for(size_t i=0; i<dim; i++) {
         program->altitudes[i] = altitudes[i];
-        program->settings[i] = settings[i];
+        program->settings[i] = settings[i] * FIFTEENTH;
     }
     return program;
 }
@@ -265,7 +266,7 @@ Program *init_altitude_angle_seed(Program *program) {
     assert(program->length == dim);
     double altitudes[] = {-600000.0, 1000.0, 2000.0, 5000.0, 12000.0, 23000.0, 35000.0, 45000.0, 60000.0};
     //double settings[] = {90*DEGREE, 85*DEGREE, 85*DEGREE, 90*DEGREE, 45*DEGREE, 30*DEGREE, 10*DEGREE, 5*DEGREE, 0*DEGREE};
-    double settings_degree[] ={90.0, 90.0, 90.0, 85.0, 50.0, 20.0, 10.0, 5.0, 5.0};
+    double settings_degree[] ={90.0, 90.0, 90.0, 85.0, 50.0, 20.0, 10.0, 5.0, 0.0};
     for(size_t i=0; i<dim; i++) {
         program->altitudes[i] = altitudes[i];
         program->settings[i] = settings_degree[i] * DEGREE;

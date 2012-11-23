@@ -7,8 +7,8 @@
 #include "system.h"
 
 #define OPTIMIZER_CHILDREN 16
-#define THROTTLE_INTERVALS 12 //N intervals means throttle settings will be in [0.0,1.0] with step 1/N.
-#define ALTITUDE_ANGLE_INTERVALS 18 //N intervals means throttle settings will be in [0.0,2*PI] with step 2*PI/N.
+#define THROTTLE_INTERVALS 15 //15->indicator marks; N intervals means throttle settings will be in [0.0,1.0] with step 1/N.
+#define ALTITUDE_ANGLE_INTERVALS 18 //18->5 degrees; N intervals means throttle settings will be in [0.0,2*PI] with step 2*PI/N.
 
 typedef void *(*InitFunc)(void *);
 
