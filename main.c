@@ -253,7 +253,7 @@ Program *init_throttle_seed(Program *program) {
     assert(program->length == dim);
     double altitudes[] = {-600000.0, 1000.0, 2000.0, 5000.0, 12000.0, 23000.0, 35000.0, 45000.0, 60000.0};
     //double settings[] = {1.0, 0.9, 0.7, 0.5, 0.6, 0.8, 0.8, 0.9, 1.0};
-    double settings[] = {15, 15, 15, 15, 15, 8, 13, 4, 1};
+    double settings[] = {15, 15, 15, 15, 15, 8, 12, 4, 8};
     for(size_t i=0; i<dim; i++) {
         program->altitudes[i] = altitudes[i];
         program->settings[i] = settings[i] * FIFTEENTH;
