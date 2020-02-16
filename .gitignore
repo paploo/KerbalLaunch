@@ -3,7 +3,10 @@ kerbal_launch.debug
 *.o
 *.plist
 
+cmake-build-debug
+
 *.csv
 
+.idea
 *.swp
 *.swo

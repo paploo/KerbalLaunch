@@ -15,7 +15,10 @@ At this time it is kept simple: We only handle single-stage rockets.
 
 USE
 
+Original 2012 Script:
   make && make run
+
+Importing into CLion (2020) resulted an the auto creation of a CMake file
 
 In the long run, this should output a reasonably optimal flight program for
 the rocket launch from Kerbin.
