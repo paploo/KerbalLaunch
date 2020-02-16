@@ -31,7 +31,7 @@ double planetoid_atm(const Planetoid *self, Vector position) {
     if( a >= self->max_atmospheric_altitude )
         return 0.0;
     else if( a >= 0.0 )
-        return expf(-a / self->atmospheric_attenuation);
+        return exp(-a / self->atmospheric_attenuation);
     else
         return 1.0;
 }

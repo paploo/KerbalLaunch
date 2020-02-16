@@ -8,8 +8,8 @@
 
 #define VECTOR_DIMS 2
 
-#define VX(vec) (vec.v[0])
-#define VY(vec) (vec.v[1])
+#define VX(vec) ((vec).v[0])
+#define VY(vec) ((vec).v[1])
 
 #ifdef KERBAL_LAUNCH_FLOAT_TRIG
 #define kerbal_atan2(y,x) (atan2f((y),(x)))
